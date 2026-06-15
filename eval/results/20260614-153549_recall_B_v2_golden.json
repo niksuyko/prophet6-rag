@@ -1,0 +1,1467 @@
+{
+ "run": "B_v2_golden",
+ "k": 5,
+ "mode": "strat+div",
+ "timestamp": "20260614-153549",
+ "overall_recall": 0.659,
+ "per_bucket": {
+  "bucket_2": {
+   "n": 55,
+   "hits": 35,
+   "recall": 0.636
+  },
+  "bucket_3": {
+   "n": 12,
+   "hits": 8,
+   "recall": 0.667
+  },
+  "bucket_5": {
+   "n": 18,
+   "hits": 13,
+   "recall": 0.722
+  }
+ },
+ "per_query": [
+  {
+   "id": "v2-b2-q01",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-k15gcc-gdmk7ca",
+    "target": {
+     "source_type": "reddit",
+     "match": "k15gcc"
+    }
+   },
+   "top_chunks": [
+    "reddit-k15gcc-gdmk7ca",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1",
+    "translation::minimoog",
+    "manual-2.1-amplifier-envelope",
+    "video::qA0ZmI6akTA::6"
+   ]
+  },
+  {
+   "id": "v2-b2-q02",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-m57t4o-gqzzj36",
+    "target": {
+     "source_type": "reddit",
+     "match": "m57t4o"
+    }
+   },
+   "top_chunks": [
+    "reddit-m57t4o-gqzzj36",
+    "sos_secret-big-red-button-why-bother-0",
+    "translation::arp-odyssey",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "patch::p6-omom-216"
+   ]
+  },
+  {
+   "id": "v2-b2-q03",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-i1qd02-g00a6xt",
+    "target": {
+     "source_type": "reddit",
+     "match": "i1qd02"
+    }
+   },
+   "top_chunks": [
+    "reddit-i1qd02-g00a6xt",
+    "reddit-7m8pjx-drtzuvq",
+    "patch::p6-factory-228",
+    "patch::p6-factory-056",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q04",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-e8u0f5-fafdeei",
+    "target": {
+     "source_type": "reddit",
+     "match": "e8u0f5"
+    }
+   },
+   "top_chunks": [
+    "reddit-e8u0f5-fafdeei",
+    "reddit-bjnpic-emafm8m",
+    "reddit-7rupi6-dsztbqg",
+    "reddit-gcs2q7-fpe6gn9",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q05",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kyhzcx-gji1e4o",
+    "target": {
+     "source_type": "reddit",
+     "match": "kyhzcx"
+    }
+   },
+   "top_chunks": [
+    "reddit-kyhzcx-gji1e4o",
+    "translation::supersaw",
+    "translation::juno",
+    "video::2__Oo0PobRo::63",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q06",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-dttsfg-f717em4",
+    "target": {
+     "source_type": "reddit",
+     "match": "dttsfg"
+    }
+   },
+   "top_chunks": [
+    "reddit-dttsfg-f717em4",
+    "manual-2.1-mixer",
+    "translation::jupiter-8",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "video::j4Gy-rSANng::0"
+   ]
+  },
+  {
+   "id": "v2-b2-q07",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-by69on-eqdsr3j",
+    "reddit-um0yq9-i81pxov",
+    "reddit-xyfq9j-irh1bux",
+    "reddit-syolvq-hy32bms",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q08",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-9tf5ty-e98nu4s",
+    "reddit-hcdsfz-fven9eh",
+    "video::yT18zW_0PFs::42",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-2",
+    "video::sCBMjJ-wkrA::106"
+   ]
+  },
+  {
+   "id": "v2-b2-q09",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-lb3aqq-glrt21a",
+    "target": {
+     "source_type": "reddit",
+     "match": "lb3aqq"
+    }
+   },
+   "top_chunks": [
+    "reddit-lb3aqq-glrt21a",
+    "reddit-wdwpvj-iip46ir",
+    "reddit-iibyh0-g36hipz",
+    "reddit-zr1w74-j13i2qh",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q10",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-ll2yqx-gnn8g8c",
+    "target": {
+     "source_type": "reddit",
+     "match": "ll2yqx"
+    }
+   },
+   "top_chunks": [
+    "reddit-ll2yqx-gnn8g8c",
+    "reddit-y253vb-is0wn59",
+    "sos_more-about-envelopes-why-are-we-all-here-anyway-0",
+    "translation::prophet-5",
+    "patch::p6-factory-125"
+   ]
+  },
+  {
+   "id": "v2-b2-q11",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-hu3vqk-fylsluj",
+    "target": {
+     "source_type": "reddit",
+     "match": "hu3vqk"
+    }
+   },
+   "top_chunks": [
+    "reddit-hu3vqk-fylsluj",
+    "reddit-ssrzi2-hwzis90",
+    "sos_synthesizing-bells-the-bell-s-sound-0",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-2",
+    "translation::cs-80"
+   ]
+  },
+  {
+   "id": "v2-b2-q12",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-iys8o3-hptt9iq",
+    "reddit-iv8qri-g5q64ha",
+    "translation::mellotron",
+    "translation::cs-80",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q13",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-azu9lt-eiayppw",
+    "reddit-7njkgb-ds392hr",
+    "reddit-avxyq9-ehjsc3s",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2",
+    "patch::p6-factory-104"
+   ]
+  },
+  {
+   "id": "v2-b2-q14",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-jcyn2t-g95nz7u",
+    "target": {
+     "source_type": "reddit",
+     "match": "jcyn2t"
+    }
+   },
+   "top_chunks": [
+    "reddit-jcyn2t-g95nz7u",
+    "reddit-evj1gs-ffwqg29",
+    "translation::mellotron",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2",
+    "patch::p6-factory-142"
+   ]
+  },
+  {
+   "id": "v2-b2-q15",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-i84pyr-g16s2pf",
+    "target": {
+     "source_type": "reddit",
+     "match": "i84pyr"
+    }
+   },
+   "top_chunks": [
+    "reddit-i84pyr-g16s2pf",
+    "patch::p6-factory-003",
+    "patch::p6-factory-310",
+    "reddit-2r57an-cnd7iu3",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q16",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-gx14dp-fsz8bdw",
+    "target": {
+     "source_type": "reddit",
+     "match": "gx14dp"
+    }
+   },
+   "top_chunks": [
+    "reddit-gx14dp-fsz8bdw",
+    "reddit-9bft0f-e52vqp5",
+    "reddit-bevqa5-el90wrd",
+    "reddit-fn805s-fl83fq6",
+    "patch::p6-factory-059"
+   ]
+  },
+  {
+   "id": "v2-b2-q17",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-bjy20s-emce32p",
+    "target": {
+     "source_type": "reddit",
+     "match": "bjy20s"
+    }
+   },
+   "top_chunks": [
+    "reddit-bjy20s-emce32p",
+    "reddit-a2dmdj-eaz67ky",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "translation::jupiter-8",
+    "reddit-1ikznf1-mbqv8dn"
+   ]
+  },
+  {
+   "id": "v2-b2-q18",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-binfie-em2kwg2",
+    "target": {
+     "source_type": "reddit",
+     "match": "binfie"
+    }
+   },
+   "top_chunks": [
+    "reddit-binfie-em2kwg2",
+    "reddit-emkpem-fdpq8dq",
+    "manual-2.1-arpeggiator-using-the-arpeggiator-in-a-poly-chained-system",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "translation::oberheim"
+   ]
+  },
+  {
+   "id": "v2-b2-q19",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kxvtob-gjckh40",
+    "target": {
+     "source_type": "reddit",
+     "match": "kxvtob"
+    }
+   },
+   "top_chunks": [
+    "reddit-kxvtob-gjckh40",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "manual-2.1-effects-main-parameters-1",
+    "translation::oberheim",
+    "addendum-1.3.1-new-effects-flanger-ring-modulator-and-phaser-3"
+   ]
+  },
+  {
+   "id": "v2-b2-q20",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-78rsss-dowlv8x",
+    "reddit-5ftmf9-dang51a",
+    "translation::mellotron",
+    "video::E2SaU6_6ovo::3",
+    "manual-2.1-effects-main-parameters-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q21",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g1p7gx-fnh2h4m",
+    "target": {
+     "source_type": "reddit",
+     "match": "g1p7gx"
+    }
+   },
+   "top_chunks": [
+    "reddit-g1p7gx-fnh2h4m",
+    "reddit-7mohra-drvuznw",
+    "reddit-w0vpp1-igh7799",
+    "reddit-bbjrxl-ekjfjl0",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q22",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-bbqrck-ekli82a",
+    "target": {
+     "source_type": "reddit",
+     "match": "bbqrck"
+    }
+   },
+   "top_chunks": [
+    "reddit-bbqrck-ekli82a",
+    "reddit-xf1kl2-iony49d",
+    "reddit-em43d1-fdmvs3w",
+    "reddit-66xprr-dgq5jo7",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q23",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-12ih1px-jftg6jf",
+    "target": {
+     "source_type": "reddit",
+     "match": "12ih1px"
+    }
+   },
+   "top_chunks": [
+    "reddit-12ih1px-jftg6jf",
+    "reddit-k1y2i8-gdrb24n",
+    "manual-2.1-slop",
+    "translation::jupiter-8",
+    "patch::p6-omom-161"
+   ]
+  },
+  {
+   "id": "v2-b2-q24",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-vjdi6q-idik1ts",
+    "target": {
+     "source_type": "reddit",
+     "match": "vjdi6q"
+    }
+   },
+   "top_chunks": [
+    "reddit-vjdi6q-idik1ts",
+    "reddit-5kgukt-dbp4drk",
+    "reddit-agcx0b-ee5f2b6",
+    "reddit-dpaist-f5tulb7",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q25",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-k3b9oi-ge1po0f",
+    "target": {
+     "source_type": "reddit",
+     "match": "k3b9oi"
+    }
+   },
+   "top_chunks": [
+    "reddit-k3b9oi-ge1po0f",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2",
+    "sos_synthesizing-rest-hammond-organ-part-1-analysing-the-rotary-speaker-cabinet-0",
+    "reddit-kxvtob-gjdlxg6",
+    "translation::mellotron"
+   ]
+  },
+  {
+   "id": "v2-b2-q26",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-8qsmra-e0ltt71",
+    "target": {
+     "source_type": "reddit",
+     "match": "8qsmra"
+    }
+   },
+   "top_chunks": [
+    "reddit-8qsmra-e0ltt71",
+    "reddit-s925hg-htla59u",
+    "reddit-kt800e-gilglpq",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1",
+    "patch::p6-factory-245"
+   ]
+  },
+  {
+   "id": "v2-b2-q27",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-6l2cj2-dk2hwaj",
+    "target": {
+     "source_type": "reddit",
+     "match": "6l2cj2"
+    }
+   },
+   "top_chunks": [
+    "reddit-6l2cj2-dk2hwaj",
+    "reddit-di0yvg-f3t8usw",
+    "manual-2.1-amplifier-envelope",
+    "reddit-jqx2z3-gbqa087",
+    "translation::cs-80"
+   ]
+  },
+  {
+   "id": "v2-b2-q28",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-jfz6pw-g9p30nl",
+    "target": {
+     "source_type": "reddit",
+     "match": "jfz6pw"
+    }
+   },
+   "top_chunks": [
+    "reddit-jfz6pw-g9p30nl",
+    "reddit-iz3osd-g6glw9e",
+    "reddit-104wh2e-j39wdbd",
+    "translation::sh-101",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q29",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-en2a7a-fdve6n6",
+    "reddit-7wtnlo-du3h3iz",
+    "reddit-8fsyr4-dy79b4w",
+    "reddit-jqx2z3-gbqa087",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q30",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-e6jj9l-f9rkk90",
+    "target": {
+     "source_type": "reddit",
+     "match": "e6jj9l"
+    }
+   },
+   "top_chunks": [
+    "reddit-e6jj9l-f9rkk90",
+    "reddit-onpn3o-h5tgukh",
+    "manual-2.1-effects-main-parameters-0",
+    "translation::mellotron",
+    "patch::p6-factory-228"
+   ]
+  },
+  {
+   "id": "v2-b2-q31",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-ahn3vq-eeg2o2g",
+    "target": {
+     "source_type": "reddit",
+     "match": "ahn3vq"
+    }
+   },
+   "top_chunks": [
+    "reddit-ahn3vq-eeg2o2g",
+    "reddit-i3405j-g08z2i6",
+    "sos_practical-snare-drum-synthesis-snares-on-the-roland-sh101-0",
+    "manual-2.1-amplifier-envelope",
+    "patch::p6-factory-294"
+   ]
+  },
+  {
+   "id": "v2-b2-q32",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-7kjrgp-dreytnz",
+    "target": {
+     "source_type": "reddit",
+     "match": "7kjrgp"
+    }
+   },
+   "top_chunks": [
+    "reddit-7kjrgp-dreytnz",
+    "reddit-c6l3re-esatxdi",
+    "video::i1PCaePgs5Y::30",
+    "reddit-k8gn2y-geyftoa",
+    "manual-2.1-unison"
+   ]
+  },
+  {
+   "id": "v2-b2-q33",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "video::gaW-L5EIaZ0::19",
+    "video::yT18zW_0PFs::42",
+    "reddit-euv6qi-fft3924",
+    "translation::cs-80",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-3"
+   ]
+  },
+  {
+   "id": "v2-b2-q34",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-o86e3s-h3398dt",
+    "target": {
+     "source_type": "reddit",
+     "match": "o86e3s"
+    }
+   },
+   "top_chunks": [
+    "reddit-o86e3s-h3398dt",
+    "reddit-wykvjd-ilxdm1w",
+    "translation::dx7",
+    "addendum-1.3.1-new-effects-flanger-ring-modulator-and-phaser-3",
+    "manual-2.1-effects-main-parameters-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q35",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-fqua17-flscd8g",
+    "reddit-mi16ju-gt239oq",
+    "patch::p6-factory-215",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-2",
+    "reddit-6xh7ir-dmh4p16"
+   ]
+  },
+  {
+   "id": "v2-b2-q36",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-68bb1x-dgx5s6n",
+    "reddit-dqq4i1-f68y1hc",
+    "translation::cs-80",
+    "translation::mellotron",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q37",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-13d4ubb-jjjtjny",
+    "target": {
+     "source_type": "reddit",
+     "match": "13d4ubb"
+    }
+   },
+   "top_chunks": [
+    "reddit-13d4ubb-jjjtjny",
+    "reddit-6rm45h-dl6cvc5",
+    "sos_practical-bass-drum-synthesis-practical-bass-drum-synthesis-0",
+    "sos_practical-snare-drum-synthesis-the-sound-of-the-drum-1",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q38",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-es7fwh-ff8l0yf",
+    "target": {
+     "source_type": "reddit",
+     "match": "es7fwh"
+    }
+   },
+   "top_chunks": [
+    "reddit-es7fwh-ff8l0yf",
+    "reddit-gxdsd6-ft1ccis",
+    "video::tpkQsmXFy3w::843",
+    "patch::p6-factory-221",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q39",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-u6oejy-i59ua52",
+    "reddit-onpn3o-h5tgukh",
+    "reddit-hjd1jg-fwwjhb0",
+    "translation::cs-80",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q40",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-kt67bk-gik5uzr",
+    "translation::jupiter-8",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "translation::string-machine",
+    "reddit-lrkpyy-gomw1vb"
+   ]
+  },
+  {
+   "id": "v2-b2-q41",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-f2mbaz-fhevua9",
+    "reddit-bkfgw2-emj13yf",
+    "patch::p6-factory-204",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2",
+    "reddit-2r57an-cnd7iu3"
+   ]
+  },
+  {
+   "id": "v2-b2-q42",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-u1eywh-i4c7bhe",
+    "sos_synthesizing-bells-from-cymbals-to-bells-0",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0",
+    "video::xsz7bd3oBig::5"
+   ]
+  },
+  {
+   "id": "v2-b2-q43",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-wdppgk-ij026wc",
+    "reddit-kjwyy9-gh0e5gi",
+    "translation::string-machine",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1",
+    "sos_synthesizing-bowed-strings-violin-family-synthesizing-bowed-strings-the-violin-fa-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q44",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-7imz7r-dr09rox",
+    "target": {
+     "source_type": "reddit",
+     "match": "7imz7r"
+    }
+   },
+   "top_chunks": [
+    "reddit-7imz7r-dr09rox",
+    "reddit-pzx3ih-hf4vk2t",
+    "reddit-kxtwsf-gjcivcw",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0",
+    "translation::jupiter-8"
+   ]
+  },
+  {
+   "id": "v2-b2-q45",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-xyahcl-irizkpe",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0",
+    "translation::string-machine",
+    "video::dBfU8U7DnM4::56",
+    "reddit-m45vy9-gqspozt"
+   ]
+  },
+  {
+   "id": "v2-b2-q46",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-ova8l5-h784gt3",
+    "reddit-ig1wdq-g2romou",
+    "reddit-5iqrib-dbau23s",
+    "patch::p6-factory-283",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q47",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-es7fwh-ff8l0yf",
+    "video::tpkQsmXFy3w::554",
+    "sos_creating_usable_synth_bass-going-cinematic-0",
+    "reddit-7bkbsu-dpiycyn",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q48",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-jm2tif-gat4we3",
+    "manual-2.1-filter-envelope",
+    "sos_more-creative-synthesis-delays-creating-chorused-sounds-without-chorus-0",
+    "translation::supersaw",
+    "patch::p6-factory-322"
+   ]
+  },
+  {
+   "id": "v2-b2-q49",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g6va4n-fodtnyu",
+    "target": {
+     "source_type": "reddit",
+     "match": "g6va4n"
+    }
+   },
+   "top_chunks": [
+    "reddit-g6va4n-fodtnyu",
+    "video::iuOlPy_AlIA::2243",
+    "video::EaN17K9pD54::736",
+    "translation::mellotron",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q50",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-h8liht-furquqe",
+    "translation::cs-80",
+    "reddit-gi962i-fqd88i0",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2",
+    "video::sCBMjJ-wkrA::106"
+   ]
+  },
+  {
+   "id": "v2-b2-q51",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "video::E2SaU6_6ovo::3",
+    "reddit-d40mbn-f0eds8m",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "patch::p6-omom-150",
+    "reddit-h0rfks-ftnszap"
+   ]
+  },
+  {
+   "id": "v2-b2-q52",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-fme2ra-fl3tvpn",
+    "target": {
+     "source_type": "reddit",
+     "match": "fme2ra"
+    }
+   },
+   "top_chunks": [
+    "reddit-fme2ra-fl3tvpn",
+    "reddit-ur2wc9-i8uz3k2",
+    "video::E2SaU6_6ovo::3",
+    "translation::supersaw",
+    "manual-2.1-effects-main-parameters-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q53",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-8a8rw6-dwwwd7u",
+    "target": {
+     "source_type": "reddit",
+     "match": "8a8rw6"
+    }
+   },
+   "top_chunks": [
+    "reddit-8a8rw6-dwwwd7u",
+    "reddit-jmwb8r-gay8p1e",
+    "sos_synthesizing-plucked-strings-part-4-the-hollow-body-0",
+    "patch::p6-factory-056",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q54",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-8fsyr4-dy79b4w",
+    "target": {
+     "source_type": "reddit",
+     "match": "8fsyr4"
+    }
+   },
+   "top_chunks": [
+    "reddit-en2a7a-fdve6n6",
+    "reddit-7wtnlo-du3h3iz",
+    "reddit-8fsyr4-dy79b4w",
+    "reddit-jqx2z3-gbqa087",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q55",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-113l9cq-j8qz052",
+    "target": {
+     "source_type": "reddit",
+     "match": "113l9cq"
+    }
+   },
+   "top_chunks": [
+    "reddit-113l9cq-j8qz052",
+    "reddit-l6ev3f-gl0f706",
+    "reddit-i7e5rt-g11ihb9",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2",
+    "patch::p6-factory-286"
+   ]
+  },
+  {
+   "id": "v2-b3-q01",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-binfie-em2u9xf",
+    "reddit-in7ip1-g46q7ie",
+    "reddit-eg3thz-fc4qsij",
+    "patch::p6-factory-341",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b3-q02",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-c3an6z-erpte6p",
+    "target": {
+     "source_type": "reddit",
+     "match": "c3an6z"
+    }
+   },
+   "top_chunks": [
+    "reddit-c3an6z-erpte6p",
+    "reddit-1fu5riw-lpxlaqr",
+    "video::gaW-L5EIaZ0::19",
+    "sos_practical-percussion-synthesis-timpani-sometimes-digital-is-best-0",
+    "manual-2.1-effects"
+   ]
+  },
+  {
+   "id": "v2-b3-q03",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-hnzddt-fxfjgvi",
+    "target": {
+     "source_type": "reddit",
+     "match": "hnzddt"
+    }
+   },
+   "top_chunks": [
+    "reddit-hnzddt-fxfjgvi",
+    "musicradar_thriller_bass-how-to-recreate-the-classic-thriller-syn-1",
+    "translation::jupiter-8",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "translation::dx7"
+   ]
+  },
+  {
+   "id": "v2-b3-q04",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-arcwcs-egmp9xi",
+    "target": {
+     "source_type": "reddit",
+     "match": "arcwcs"
+    }
+   },
+   "top_chunks": [
+    "reddit-arcwcs-egmp9xi",
+    "reddit-mc5yqm-gs1vhte",
+    "reddit-diuvu2-f4ikvfk",
+    "translation::dx7",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b3-q05",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "patch::p6-factory-226",
+    "translation::minimoog",
+    "reddit-k1masn-gdpxbqz",
+    "reddit-1gmqj5j-lw4sree",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b3-q06",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-fdv54m-fjkc9il",
+    "target": {
+     "source_type": "reddit",
+     "match": "fdv54m"
+    }
+   },
+   "top_chunks": [
+    "reddit-fdv54m-fjkc9il",
+    "sos_polyphony-digital-synths-phew-now-back-to-70s-oberheims-0",
+    "reddit-bqgdzo-eo4z9zj",
+    "translation::oberheim",
+    "manual-2.1-effects-main-parameters-1"
+   ]
+  },
+  {
+   "id": "v2-b3-q07",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-c3ftag-erryv1i",
+    "target": {
+     "source_type": "reddit",
+     "match": "c3ftag"
+    }
+   },
+   "top_chunks": [
+    "reddit-c3ftag-erryv1i",
+    "reddit-wunji4-ildn30f",
+    "reddit-c5p60g-es4lb94",
+    "translation::minimoog",
+    "manual-2.1-effects-main-parameters-0"
+   ]
+  },
+  {
+   "id": "v2-b3-q08",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kzwwom-gjqb9ll",
+    "target": {
+     "source_type": "reddit",
+     "match": "kzwwom"
+    }
+   },
+   "top_chunks": [
+    "reddit-kzwwom-gjqb9ll",
+    "reddit-10d8r3j-j4kw3h0",
+    "translation::sh-101",
+    "manual-2.1-sequencer-programming-the-sequencer",
+    "reddit-i8x4mz-g1cueqi"
+   ]
+  },
+  {
+   "id": "v2-b3-q09",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-75nval-doabh2s",
+    "target": {
+     "source_type": "reddit",
+     "match": "75nval"
+    }
+   },
+   "top_chunks": [
+    "reddit-75nval-doabh2s",
+    "reddit-t5ev1u-hz4x945",
+    "manual-2.1-unison",
+    "patch::p6-factory-310",
+    "translation::dx7"
+   ]
+  },
+  {
+   "id": "v2-b3-q10",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-9w8liq-e9iu842",
+    "reddit-jog31i-gb8unq6",
+    "roland_icon_juno106-5-key-features-0",
+    "patch::p6-factory-017",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b3-q11",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "patch::p6-omom-014",
+    "patch::p6-factory-123",
+    "reddit-79l8np-dp37vg9",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-0",
+    "translation::prophet-5"
+   ]
+  },
+  {
+   "id": "v2-b3-q12",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-m6ykpx-gr8c3mc",
+    "target": {
+     "source_type": "reddit",
+     "match": "m6ykpx"
+    }
+   },
+   "top_chunks": [
+    "reddit-m6ykpx-gr8c3mc",
+    "reddit-13ndkla-jkzh6hb",
+    "translation::sh-101",
+    "video::2__Oo0PobRo::63",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b5-q01",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-000",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-000"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-400",
+    "patch::p6-factory-059",
+    "patch::p6-factory-000",
+    "reddit-upa5ec-i8nm3i8",
+    "manual-2.1-filter-envelope-changing-the-filter-envelope-s-response-curv"
+   ]
+  },
+  {
+   "id": "v2-b5-q02",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-002",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-002"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-002",
+    "patch::p6-factory-220",
+    "patch::p6-factory-021",
+    "reddit-1iggfni-mapxtlm",
+    "manual-2.1-filter-envelope-changing-the-filter-envelope-s-response-curv"
+   ]
+  },
+  {
+   "id": "v2-b5-q03",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "video::2__Oo0PobRo::63",
+    "video::3wYYd9-gQI4::30",
+    "translation::dx7",
+    "video::j4Gy-rSANng::0",
+    "reddit-j958jw-g8hismo"
+   ]
+  },
+  {
+   "id": "v2-b5-q04",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-005",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-005"
+    }
+   },
+   "top_chunks": [
+    "reddit-qznz0m-hlnsgx0",
+    "patch::p6-factory-005",
+    "sos_synth_secrets_47_pwm_strings-creating-pwm-without-pwm-0",
+    "video::_e_nBDJNoWg::200",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-3"
+   ]
+  },
+  {
+   "id": "v2-b5-q05",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "patch::p6-factory-200",
+    "sos_synthesizing-acoustic-pianos-roland-jx10-1102-generating-hard-sync-0",
+    "patch::p6-factory-355",
+    "reddit-lxwqnj-gppixhd",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-3"
+   ]
+  },
+  {
+   "id": "v2-b5-q06",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-013",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-013"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-013",
+    "patch::p6-factory-002",
+    "sos_synth_secrets_46_string_machines-pulse-width-modulation-1",
+    "reddit-iahj7x-g1q25mo",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b5-q07",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-017",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-017"
+    }
+   },
+   "top_chunks": [
+    "video::1McsmIXkD4U::78",
+    "video::_e_nBDJNoWg::200",
+    "patch::p6-factory-017",
+    "reddit-14p9yhx-jqk41vh",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-3"
+   ]
+  },
+  {
+   "id": "v2-b5-q08",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-022",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-022"
+    }
+   },
+   "top_chunks": [
+    "reddit-bm1hny-emt5peg",
+    "reddit-131koqm-ji40nx0",
+    "patch::p6-factory-022",
+    "reddit-l6nsg6-gl2wjdw",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1"
+   ]
+  },
+  {
+   "id": "v2-b5-q09",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "sos_creating_usable_synth_bass-from-wood-to-chips-0",
+    "reddit-dg6al5-f39mndx",
+    "video::xsz7bd3oBig::5",
+    "patch::p6-factory-086",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b5-q10",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-031",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-031"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-031",
+    "reddit-z7rmg3-iy80vkg",
+    "sos_synthesizing-bells-the-tr808-hi-hat-0",
+    "video::EaN17K9pD54::580",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b5-q11",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-055",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-055"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-055",
+    "sos_synth_secrets_46_string_machines-shaping-the-sound-0",
+    "anwander_roland_choruses-roland-choruses-and-ensemble-effects-0",
+    "reddit-uusw91-i9hh04l",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b5-q12",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-059",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-059"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-059",
+    "reddit-rlfvui-hpfi2z7",
+    "manual-2.1-unison-using-chord-memory",
+    "reddit-hzi8aa-fzjo698",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1"
+   ]
+  },
+  {
+   "id": "v2-b5-q13",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-wri2hz-ikusy9u",
+    "sos_synthesizing-bells-the-bell-s-sound-0",
+    "patch::p6-factory-038",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-1",
+    "reddit-ee2orz-fbp4ghz"
+   ]
+  },
+  {
+   "id": "v2-b5-q14",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-086",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-086"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-086",
+    "patch::p6-factory-024",
+    "video::j4Gy-rSANng::0",
+    "video::2__Oo0PobRo::63",
+    "reddit-8f15uz-dy0w7pi"
+   ]
+  },
+  {
+   "id": "v2-b5-q15",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-988sck-e4exxw4",
+    "translation::dx7",
+    "manual-2.1-poly-mod-poly-mod-parameters",
+    "video::iuOlPy_AlIA::2243",
+    "reddit-dgrsuv-f3ffo2d"
+   ]
+  },
+  {
+   "id": "v2-b5-q16",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-omom-014",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-omom-014"
+    }
+   },
+   "top_chunks": [
+    "reddit-veoz44-ics9miq",
+    "patch::p6-omom-014",
+    "patch::p6-factory-142",
+    "translation::polysix",
+    "manual-2.1-poly-mod"
+   ]
+  },
+  {
+   "id": "v2-b5-q17",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-omom-017",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-omom-017"
+    }
+   },
+   "top_chunks": [
+    "video::yT18zW_0PFs::42",
+    "patch::p6-omom-017",
+    "reddit-l5oi7y-gkxzqwb",
+    "video::sCBMjJ-wkrA::106",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b5-q18",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-omom-149",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-omom-149"
+    }
+   },
+   "top_chunks": [
+    "reddit-syid30-hxxyabo",
+    "patch::p6-factory-200",
+    "translation::arp-odyssey",
+    "patch::p6-omom-149",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-1"
+   ]
+  }
+ ]
+}

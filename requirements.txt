@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+pymupdf
+pyyaml
+numpy
+sentence-transformers
+rank_bm25
+anthropic

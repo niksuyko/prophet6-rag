@@ -1,0 +1,50 @@
+{
+ "kind": "selftest",
+ "timestamp": "20260614-141725",
+ "probes": [
+  "warm Juno-style chorus pad with slow movement",
+  "aggressive bright hard-sync lead",
+  "deep punchy sub bass, short percussive pluck"
+ ],
+ "roundtrip_matrix": [
+  [
+   0.5773980617523193,
+   0.5441767573356628,
+   0.4724787771701813
+  ],
+  [
+   0.567132830619812,
+   0.6288127899169922,
+   0.45618224143981934
+  ],
+  [
+   0.5249043107032776,
+   0.5245156288146973,
+   0.551537036895752
+  ]
+ ],
+ "judge_matrix": [
+  [
+   4,
+   2,
+   1
+  ],
+  [
+   1,
+   3,
+   1
+  ],
+  [
+   1,
+   1,
+   3
+  ]
+ ],
+ "roundtrip_sep": 0.07101753850777937,
+ "judge_sep": 2.166666666666667,
+ "rubric_juno": [
+  0.667,
+  0.333,
+  0.333
+ ]
+}

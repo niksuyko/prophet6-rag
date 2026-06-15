@@ -1,0 +1,33 @@
+# Hand-checked validation map for the manual chunker (decisions.md D-007).
+# Sections verified against the manual's own printed TOC; expected_phrase is a string
+# that must appear in that section's chunk text. validate_manual_chunks.py asserts both.
+- section: Slop
+  expected_phrase: randomized detuning
+- section: Mixer
+  expected_phrase: levels of the various
+- section: Poly Mod
+  expected_phrase: Filter Env
+- section: Arpeggiator
+  expected_phrase: arpeggiator
+- section: Filters
+  expected_phrase: filter
+- section: Saving a Program
+  expected_phrase: write
+- section: Using Chord Memory
+  expected_phrase: chord
+- section: Aftertouch
+  expected_phrase: aftertouch
+- section: Calibrating the Prophet-6
+  expected_phrase: calibrat
+- section: Alternative Tunings
+  expected_phrase: tuning
+- section: Misc Parameters
+  expected_phrase: Pan Spread
+- section: Failed OS
+  expected_phrase: OS
+- section: Unison
+  expected_phrase: unison
+- section: Sequencer
+  expected_phrase: sequence
+- section: Effects
+  expected_phrase: effect

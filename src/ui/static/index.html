@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Prophet-6 Patch Designer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">PROPHET-6</span>
+    <span class="sub">RAG PATCH DESIGNER</span>
+  </div>
+  <form id="queryForm">
+    <input id="queryInput" type="text" autocomplete="off"
+           placeholder="Describe a sound… e.g. “warm Juno-style chorus pad with slow movement”">
+    <button id="goBtn" type="submit">Generate</button>
+    <button id="resetBtn" type="button" title="Return every control to the INIT patch">Init</button>
+  </form>
+  <div id="midiBox" title="Send the generated patch to a connected Prophet-6 (edit buffer)">
+    <button id="midiToggle" type="button" class="off">MIDI ⏻ OFF</button>
+    <select id="midiPort" disabled></select>
+    <button id="midiCapture" type="button" disabled
+            title="Read the Prophet-6's current edit buffer into the panel (e.g. capture INIT)">Capture ⤓</button>
+  </div>
+  <div id="status"></div>
+</header>
+
+<div class="stage">
+  <div class="synth">
+    <div class="cheek left"></div>
+    <main id="panel"><!-- sections rendered from /api/schema --></main>
+    <div class="cheek right"></div>
+  </div>
+
+  <aside id="sidebar">
+    <div class="placeholder">
+      <p>Type a sound description and hit <b>Generate</b>.</p>
+      <p>The patch is designed from the project's Prophet-6 corpus (manual + community
+         threads). The panel starts at INIT, then each adjusted control turns into place
+         and stays highlighted.</p>
+      <p class="dim">First generation loads the embedding model — allow ~30&nbsp;s.
+         After that it's just retrieval + one LLM call.</p>
+    </div>
+  </aside>
+</div>
+
+<script src="panel.js"></script>
+</body>
+</html>

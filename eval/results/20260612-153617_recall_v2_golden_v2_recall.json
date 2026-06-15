@@ -1,0 +1,1645 @@
+{
+ "run": "v2_golden_v2_recall",
+ "k": 5,
+ "mode": "strat+div",
+ "timestamp": "20260612-153617",
+ "overall_recall": 0.865,
+ "per_bucket": {
+  "bucket_2": {
+   "n": 55,
+   "hits": 53,
+   "recall": 0.964
+  },
+  "bucket_3": {
+   "n": 16,
+   "hits": 12,
+   "recall": 0.75
+  },
+  "bucket_5": {
+   "n": 18,
+   "hits": 12,
+   "recall": 0.667
+  }
+ },
+ "per_query": [
+  {
+   "id": "v2-b2-q01",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-k15gcc-gdo3eyn",
+    "target": {
+     "source_type": "reddit",
+     "match": "k15gcc"
+    }
+   },
+   "top_chunks": [
+    "reddit-k15gcc-gdo3eyn",
+    "sos_practical-bass-drum-synthesis-bass-drums-on-the-arp-axxe-1",
+    "manual-2.1-amplifier-envelope",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2",
+    "patch::p6-factory-371"
+   ]
+  },
+  {
+   "id": "v2-b2-q02",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-p02b1f-h84uj1d",
+    "sos_polyphony-digital-synths-phew-now-back-to-70s-oberheims-1",
+    "manual-2.1-sequencer-programming-the-sequencer",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-1",
+    "patch::p6-factory-450"
+   ]
+  },
+  {
+   "id": "v2-b2-q03",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-m57t4o-lwad8i8",
+    "target": {
+     "source_type": "reddit",
+     "match": "m57t4o"
+    }
+   },
+   "top_chunks": [
+    "reddit-m57t4o-lwad8i8",
+    "reddit-cglv7a-eul41z2",
+    "reddit-fw6px1-fmp0v8t",
+    "sos_secret-big-red-button-why-bother-0",
+    "manual-2.1-arpeggiator"
+   ]
+  },
+  {
+   "id": "v2-b2-q04",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-i1qd02-g00a6xt",
+    "target": {
+     "source_type": "reddit",
+     "match": "i1qd02"
+    }
+   },
+   "top_chunks": [
+    "reddit-i1qd02-g00a6xt",
+    "reddit-nk3k9o-gzc182r",
+    "patch::p6-factory-228",
+    "patch::p6-factory-056",
+    "manual-2.1-filters"
+   ]
+  },
+  {
+   "id": "v2-b2-q05",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kyhzcx-gji1e4o",
+    "target": {
+     "source_type": "reddit",
+     "match": "kyhzcx"
+    }
+   },
+   "top_chunks": [
+    "reddit-kyhzcx-gji1e4o",
+    "sos_secret-big-red-button-the-secret-of-the-big-red-button-0",
+    "manual-2.1-appendix-d-support-troubleshooting",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-0",
+    "patch::p6-factory-292"
+   ]
+  },
+  {
+   "id": "v2-b2-q06",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-dttsfg-f717em4",
+    "target": {
+     "source_type": "reddit",
+     "match": "dttsfg"
+    }
+   },
+   "top_chunks": [
+    "reddit-dttsfg-f717em4",
+    "reddit-mlq9qb-gtnntke",
+    "sos_creating_usable_synth_bass-going-cinematic-0",
+    "manual-2.1-mixer",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q07",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-ib36wz-g1tedjg",
+    "target": {
+     "source_type": "reddit",
+     "match": "ib36wz"
+    }
+   },
+   "top_chunks": [
+    "reddit-ib36wz-g1tedjg",
+    "reddit-9tf5ty-e98nu4s",
+    "reddit-jrr5p8-gbyhqke",
+    "sos_synth_secrets_47_pwm_strings-synthesizing-strings-pwm-string-sounds-0",
+    "patch::p6-factory-303"
+   ]
+  },
+  {
+   "id": "v2-b2-q08",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-lb3aqq-glrt21a",
+    "target": {
+     "source_type": "reddit",
+     "match": "lb3aqq"
+    }
+   },
+   "top_chunks": [
+    "reddit-lb3aqq-glrt21a",
+    "reddit-lxl9dp-gpob90c",
+    "reddit-l6eubq-gl07uvg",
+    "patch::p6-omom-218",
+    "manual-2.1-low-frequency-oscillators"
+   ]
+  },
+  {
+   "id": "v2-b2-q09",
+   "bucket": 2,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "video::yT18zW_0PFs::42",
+    "reddit-ib36wz-g1tedjg",
+    "reddit-9tf5ty-e90pp4o",
+    "patch::p6-omom-189",
+    "manual-2.1-slop"
+   ]
+  },
+  {
+   "id": "v2-b2-q10",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-ll2yqx-gnn62jg",
+    "target": {
+     "source_type": "reddit",
+     "match": "ll2yqx"
+    }
+   },
+   "top_chunks": [
+    "reddit-ll2yqx-gnn62jg",
+    "reddit-1eg20va-lfs5dcd",
+    "sos_more-about-envelopes-why-are-we-all-here-anyway-0",
+    "manual-2.1-aftertouch-0",
+    "patch::p6-factory-210"
+   ]
+  },
+  {
+   "id": "v2-b2-q11",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-hu3vqk-fylsluj",
+    "target": {
+     "source_type": "reddit",
+     "match": "hu3vqk"
+    }
+   },
+   "top_chunks": [
+    "reddit-hu3vqk-fylsluj",
+    "reddit-jfnsbi-g9myr31",
+    "reddit-bzu08v-eqyjs2z",
+    "patch::p6-omom-038",
+    "manual-2.1-getting-started-moving-to-the-next-level"
+   ]
+  },
+  {
+   "id": "v2-b2-q12",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-cglv7a-euj2tfg",
+    "target": {
+     "source_type": "reddit",
+     "match": "cglv7a"
+    }
+   },
+   "top_chunks": [
+    "reddit-cglv7a-euj2tfg",
+    "sos_physics-percussion-synthesizing-the-un-synthesizable-0",
+    "manual-2.1-appendix-a-alternative-tunings-0",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-0",
+    "patch::p6-factory-287"
+   ]
+  },
+  {
+   "id": "v2-b2-q13",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-jgbcgo-jyq6q9y",
+    "target": {
+     "source_type": "reddit",
+     "match": "jgbcgo"
+    }
+   },
+   "top_chunks": [
+    "reddit-jgbcgo-jyq6q9y",
+    "reddit-gbsb9v-fpa0qpc",
+    "reddit-gruapo-fs2wgm4",
+    "sos_final-attempt-synthesize-guitars-patch-1-the-arp-axxe-1",
+    "patch::p6-factory-140"
+   ]
+  },
+  {
+   "id": "v2-b2-q14",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-jcyn2t-g95nz7u",
+    "target": {
+     "source_type": "reddit",
+     "match": "jcyn2t"
+    }
+   },
+   "top_chunks": [
+    "reddit-jcyn2t-g95nz7u",
+    "reddit-evj1gs-ffwqg29",
+    "reddit-y84zlm-iszalqk",
+    "patch::p6-factory-041",
+    "manual-2.1-calibrating-the-prophet-6-how-and-when-to-calibrate-the-osci"
+   ]
+  },
+  {
+   "id": "v2-b2-q15",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-i84pyr-g16s2pf",
+    "target": {
+     "source_type": "reddit",
+     "match": "i84pyr"
+    }
+   },
+   "top_chunks": [
+    "reddit-i84pyr-g16s2pf",
+    "reddit-d95i22-f1fnavh",
+    "reddit-bq971x-eo34ppz",
+    "patch::p6-factory-310",
+    "manual-2.1-mixer"
+   ]
+  },
+  {
+   "id": "v2-b2-q16",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-gx14dp-fsz8bdw",
+    "target": {
+     "source_type": "reddit",
+     "match": "gx14dp"
+    }
+   },
+   "top_chunks": [
+    "reddit-gx14dp-fsz8bdw",
+    "reddit-fn805s-fl83fq6",
+    "reddit-m57t4o-lwad8i8",
+    "patch::p6-factory-400",
+    "manual-2.1-filter-envelope-changing-the-filter-envelope-s-response-curv"
+   ]
+  },
+  {
+   "id": "v2-b2-q17",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-bjy20s-emd4ls2",
+    "target": {
+     "source_type": "reddit",
+     "match": "bjy20s"
+    }
+   },
+   "top_chunks": [
+    "reddit-bjy20s-emd4ls2",
+    "reddit-kugj1b-git5tgm",
+    "reddit-dcpdia-fdg3enl",
+    "sos_duophony-cvs-the-arp-odyssey-0",
+    "manual-2.1-slop"
+   ]
+  },
+  {
+   "id": "v2-b2-q18",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-binfie-em38kpt",
+    "target": {
+     "source_type": "reddit",
+     "match": "binfie"
+    }
+   },
+   "top_chunks": [
+    "reddit-binfie-em38kpt",
+    "reddit-ibydsp-g4dmvwz",
+    "sos_modulation-2-another-simple-modulation-0",
+    "manual-2.1-arpeggiator-using-the-arpeggiator-in-a-poly-chained-system",
+    "patch::p6-factory-209"
+   ]
+  },
+  {
+   "id": "v2-b2-q19",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kxvtob-gjckh40",
+    "target": {
+     "source_type": "reddit",
+     "match": "kxvtob"
+    }
+   },
+   "top_chunks": [
+    "reddit-kxvtob-gjckh40",
+    "reddit-11ly86w-jbfjp7m",
+    "sos_final-attempt-synthesize-guitars-a-final-attempt-to-synthesize-guitars-0",
+    "manual-2.1-effects-main-parameters-1",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q20",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-75f99r-do5xa2c",
+    "target": {
+     "source_type": "reddit",
+     "match": "75f99r"
+    }
+   },
+   "top_chunks": [
+    "reddit-75f99r-do5xa2c",
+    "sos_synthesizing-acoustic-pianos-roland-jx10-part-3-synthesizing-acoustic-pianos-on-the-rola-0",
+    "manual-2.1-effects-main-parameters-0",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-0",
+    "patch::p6-factory-456"
+   ]
+  },
+  {
+   "id": "v2-b2-q21",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g1p7gx-fnh2h4m",
+    "target": {
+     "source_type": "reddit",
+     "match": "g1p7gx"
+    }
+   },
+   "top_chunks": [
+    "reddit-g1p7gx-fnh2h4m",
+    "sos_secret-big-red-button-the-secret-of-the-big-red-button-0",
+    "manual-2.1-pitch-and-mod-wheels",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0",
+    "patch::p6-factory-358"
+   ]
+  },
+  {
+   "id": "v2-b2-q22",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-bbqrck-ekli82a",
+    "target": {
+     "source_type": "reddit",
+     "match": "bbqrck"
+    }
+   },
+   "top_chunks": [
+    "reddit-bbqrck-ekli82a",
+    "reddit-em43d1-fdmvs3w",
+    "reddit-fki1bu-fkthmg4",
+    "sos_filters-phase-relationships-phasing-filtering-1",
+    "manual-2.1-amplifier-envelope"
+   ]
+  },
+  {
+   "id": "v2-b2-q23",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-12ih1px-jfuiyou",
+    "target": {
+     "source_type": "reddit",
+     "match": "12ih1px"
+    }
+   },
+   "top_chunks": [
+    "reddit-12ih1px-jfuiyou",
+    "reddit-114thw7-j8y58jg",
+    "sos_final-attempt-synthesize-guitars-a-final-attempt-to-synthesize-guitars-0",
+    "manual-2.1-slop",
+    "patch::p6-factory-450"
+   ]
+  },
+  {
+   "id": "v2-b2-q24",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-vjdi6q-iehm4jf",
+    "target": {
+     "source_type": "reddit",
+     "match": "vjdi6q"
+    }
+   },
+   "top_chunks": [
+    "reddit-vjdi6q-iehm4jf",
+    "reddit-o86e3s-h33hao6",
+    "reddit-mofuim-gu4so42",
+    "patch::p6-factory-239",
+    "manual-2.1-amplifier-envelope"
+   ]
+  },
+  {
+   "id": "v2-b2-q25",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-k3b9oi-ge1po0f",
+    "target": {
+     "source_type": "reddit",
+     "match": "k3b9oi"
+    }
+   },
+   "top_chunks": [
+    "reddit-k3b9oi-ge1po0f",
+    "reddit-kxvtob-gjcvd2l",
+    "reddit-xcxaek-io9fy6e",
+    "sos_synthesizing-rest-hammond-organ-part-1-analysing-the-rotary-speaker-cabinet-0",
+    "manual-2.1-write-comparing-before-you-save"
+   ]
+  },
+  {
+   "id": "v2-b2-q26",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-8qsmra-e0ltt71",
+    "target": {
+     "source_type": "reddit",
+     "match": "8qsmra"
+    }
+   },
+   "top_chunks": [
+    "reddit-8qsmra-e0ltt71",
+    "reddit-gnxzmv-frebumq",
+    "reddit-f4dz8a-fhqx3xq",
+    "sos_synthesizing-acoustic-pianos-roland-jx10-part-3-synthesizing-acoustic-pianos-on-the-rola-0",
+    "patch::p6-factory-487"
+   ]
+  },
+  {
+   "id": "v2-b2-q27",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-6l2cj2-djqpriq",
+    "target": {
+     "source_type": "reddit",
+     "match": "6l2cj2"
+    }
+   },
+   "top_chunks": [
+    "reddit-6l2cj2-djqpriq",
+    "sos_practical-flute-synthesis-synthesizing-the-flute-1",
+    "manual-2.1-amplifier-envelope",
+    "prophet6_os_update_instructions-updating-the-prophet-6-os-sequential-0",
+    "patch::p6-factory-486"
+   ]
+  },
+  {
+   "id": "v2-b2-q28",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-jfz6pw-g9p30nl",
+    "target": {
+     "source_type": "reddit",
+     "match": "jfz6pw"
+    }
+   },
+   "top_chunks": [
+    "reddit-jfz6pw-g9p30nl",
+    "reddit-952ej5-e3qa7gp",
+    "sos_final-attempt-synthesize-guitars-patch-1-the-arp-axxe-1",
+    "manual-2.1-getting-started-editing-programs",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q29",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-822ao3-dv9wmji",
+    "target": {
+     "source_type": "reddit",
+     "match": "822ao3"
+    }
+   },
+   "top_chunks": [
+    "reddit-822ao3-dv9wmji",
+    "reddit-8fsyr4-dy79b4w",
+    "reddit-bvwovq-epuyj7v",
+    "patch::p6-factory-486",
+    "manual-2.1-oscillators-oscillator-parameters"
+   ]
+  },
+  {
+   "id": "v2-b2-q30",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-e6jj9l-f9rkk90",
+    "target": {
+     "source_type": "reddit",
+     "match": "e6jj9l"
+    }
+   },
+   "top_chunks": [
+    "reddit-e6jj9l-f9rkk90",
+    "reddit-8a8rw6-dwwy4gh",
+    "reddit-dwazln-f7hxph7",
+    "sos_sample-hold-sample-rate-converters-2-generating-step-sequences-1",
+    "patch::p6-factory-228"
+   ]
+  },
+  {
+   "id": "v2-b2-q31",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-ahn3vq-eeg2o2g",
+    "target": {
+     "source_type": "reddit",
+     "match": "ahn3vq"
+    }
+   },
+   "top_chunks": [
+    "reddit-ahn3vq-eeg2o2g",
+    "reddit-z8u3dw-iyh8ab1",
+    "reddit-i3405j-g09jgvo",
+    "sos_practical-snare-drum-synthesis-snares-on-the-roland-sh101-0",
+    "patch::p6-omom-038"
+   ]
+  },
+  {
+   "id": "v2-b2-q32",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-7kjrgp-dri0d59",
+    "target": {
+     "source_type": "reddit",
+     "match": "7kjrgp"
+    }
+   },
+   "top_chunks": [
+    "reddit-7kjrgp-dri0d59",
+    "video::i1PCaePgs5Y::30",
+    "sos_synth_secrets_46_string_machines-shaping-the-sound-0",
+    "manual-2.1-unison",
+    "patch::p6-factory-472"
+   ]
+  },
+  {
+   "id": "v2-b2-q33",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-62dj0b-dfmd0mq",
+    "target": {
+     "source_type": "reddit",
+     "match": "62dj0b"
+    }
+   },
+   "top_chunks": [
+    "reddit-62dj0b-dfmd0mq",
+    "video::gaW-L5EIaZ0::19",
+    "video::yT18zW_0PFs::42",
+    "patch::p6-factory-498",
+    "manual-2.1-poly-mod"
+   ]
+  },
+  {
+   "id": "v2-b2-q34",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-o86e3s-h3398dt",
+    "target": {
+     "source_type": "reddit",
+     "match": "o86e3s"
+    }
+   },
+   "top_chunks": [
+    "reddit-o86e3s-h3398dt",
+    "reddit-bzu08v-er0lxvy",
+    "reddit-e3dmdo-f92y6xg",
+    "sos_synthesizing-bells-synthesizing-bells-0",
+    "manual-2.1-effects-main-parameters-1"
+   ]
+  },
+  {
+   "id": "v2-b2-q35",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-swgau6-hxmidog",
+    "target": {
+     "source_type": "reddit",
+     "match": "swgau6"
+    }
+   },
+   "top_chunks": [
+    "reddit-swgau6-hxmidog",
+    "reddit-fochwz-flfhq0a",
+    "sos_practical-percussion-synthesis-timpani-table-3-0",
+    "manual-2.1-filters",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q36",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g2cp1n-fnl2yjz",
+    "target": {
+     "source_type": "reddit",
+     "match": "g2cp1n"
+    }
+   },
+   "top_chunks": [
+    "reddit-g2cp1n-fnl2yjz",
+    "reddit-c82yfy-eskjclb",
+    "sos_synthesizing-plucked-strings-part-4-the-hollow-body-0",
+    "manual-2.1-appendix-c-midi-implementation-sysex-messages",
+    "patch::p6-factory-472"
+   ]
+  },
+  {
+   "id": "v2-b2-q37",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-13d4ubb-jjjtjny",
+    "target": {
+     "source_type": "reddit",
+     "match": "13d4ubb"
+    }
+   },
+   "top_chunks": [
+    "reddit-13d4ubb-jjjtjny",
+    "sos_practical-bass-drum-synthesis-practical-bass-drum-synthesis-0",
+    "sos_practical-snare-drum-synthesis-the-sound-of-the-drum-1",
+    "reddit-gkj0f3-fqrksrp",
+    "manual-2.1-sequencer"
+   ]
+  },
+  {
+   "id": "v2-b2-q38",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-es7fwh-ff8l0yf",
+    "target": {
+     "source_type": "reddit",
+     "match": "es7fwh"
+    }
+   },
+   "top_chunks": [
+    "reddit-es7fwh-ff8l0yf",
+    "reddit-g5yfoh-fo6f5t6",
+    "reddit-wflk7p-iiussh8",
+    "video::tpkQsmXFy3w::843",
+    "manual-2.1-effects-main-parameters-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q39",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-860o8g-dw1vcct",
+    "target": {
+     "source_type": "reddit",
+     "match": "860o8g"
+    }
+   },
+   "top_chunks": [
+    "reddit-860o8g-dw1vcct",
+    "reddit-nk3k9o-gzc182r",
+    "reddit-ok90d5-h56ebmr",
+    "synthtopia_p5_vs_p6_blind-prophet-5-prophet-10-rev4-vs-prophet-6-b-0",
+    "patch::p6-factory-486"
+   ]
+  },
+  {
+   "id": "v2-b2-q40",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-14nxrbk-jqegu32",
+    "target": {
+     "source_type": "reddit",
+     "match": "14nxrbk"
+    }
+   },
+   "top_chunks": [
+    "reddit-14nxrbk-jqegu32",
+    "reddit-e4dq1z-f9agnri",
+    "sos_synth_secrets_46_string_machines-synthesizing-strings-string-machines-0",
+    "manual-2.1-slop",
+    "patch::p6-factory-492"
+   ]
+  },
+  {
+   "id": "v2-b2-q41",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-ecfzbh-fbblzta",
+    "target": {
+     "source_type": "reddit",
+     "match": "ecfzbh"
+    }
+   },
+   "top_chunks": [
+    "reddit-ecfzbh-fbblzta",
+    "reddit-117nmsh-j9gptzu",
+    "sos_creating_usable_synth_bass-fitting-in-0",
+    "manual-2.1-poly-mod",
+    "patch::p6-factory-204"
+   ]
+  },
+  {
+   "id": "v2-b2-q42",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kw3zes-gj24i2s",
+    "target": {
+     "source_type": "reddit",
+     "match": "kw3zes"
+    }
+   },
+   "top_chunks": [
+    "reddit-kw3zes-gj24i2s",
+    "patch::p6-omom-056",
+    "patch::p6-omom-205",
+    "sos_synthesizing-bells-epilogue-0",
+    "manual-2.1-filters"
+   ]
+  },
+  {
+   "id": "v2-b2-q43",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-e4dq1z-f9agnri",
+    "target": {
+     "source_type": "reddit",
+     "match": "e4dq1z"
+    }
+   },
+   "top_chunks": [
+    "reddit-e4dq1z-f9agnri",
+    "reddit-g8me5y-foopyt2",
+    "reddit-gm0uxf-fr1fjom",
+    "sos_introducing-polyphony-string-synthesizers-0",
+    "manual-2.1-oscillators-oscillator-parameters"
+   ]
+  },
+  {
+   "id": "v2-b2-q44",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-7imz7r-dr0e9zl",
+    "target": {
+     "source_type": "reddit",
+     "match": "7imz7r"
+    }
+   },
+   "top_chunks": [
+    "reddit-7imz7r-dr0e9zl",
+    "reddit-117nmsh-j9gptzu",
+    "reddit-kw3zes-gj25pef",
+    "reddit-jcnlwq-g932261",
+    "manual-2.1-getting-started-moving-to-the-next-level"
+   ]
+  },
+  {
+   "id": "v2-b2-q45",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-hdmk4q-fvnh8oa",
+    "target": {
+     "source_type": "reddit",
+     "match": "hdmk4q"
+    }
+   },
+   "top_chunks": [
+    "reddit-hdmk4q-fvnh8oa",
+    "sos_introducing-polyphony-organs-are-boring-synths-are-not-1",
+    "sos_synthesizing-bowed-strings-violin-family-synthesizing-bowed-strings-the-violin-fa-0",
+    "manual-2.1-oscillators-oscillator-parameters",
+    "prophet6_kb_keyboard_troubleshooting-prophet-6-keyboard-troubleshooting-0"
+   ]
+  },
+  {
+   "id": "v2-b2-q46",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-f62sdw-fi2g2hj",
+    "target": {
+     "source_type": "reddit",
+     "match": "f62sdw"
+    }
+   },
+   "top_chunks": [
+    "reddit-f62sdw-fi2g2hj",
+    "reddit-c82yfy-espu6t6",
+    "reddit-bksncb-emj99t5",
+    "musicradar_minimoog_bass-how-to-make-a-minimoog-style-bass-patch-0",
+    "patch::p6-factory-056"
+   ]
+  },
+  {
+   "id": "v2-b2-q47",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g5yfoh-fo6f5t6",
+    "target": {
+     "source_type": "reddit",
+     "match": "g5yfoh"
+    }
+   },
+   "top_chunks": [
+    "reddit-g5yfoh-fo6f5t6",
+    "reddit-es7fwh-ff8l0yf",
+    "video::tpkQsmXFy3w::554",
+    "reddit-cliqlo-evvky38",
+    "manual-2.1-oscillators"
+   ]
+  },
+  {
+   "id": "v2-b2-q48",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-691uix-dh4r4ug",
+    "target": {
+     "source_type": "reddit",
+     "match": "691uix"
+    }
+   },
+   "top_chunks": [
+    "reddit-691uix-dh4r4ug",
+    "reddit-gdxmlk-fpk6dlr",
+    "sos_synthesizing-drums-bass-drum-bass-drums-frequency-content-1",
+    "manual-2.1-getting-started-moving-to-the-next-level",
+    "patch::p6-factory-292"
+   ]
+  },
+  {
+   "id": "v2-b2-q49",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g6va4n-focykg5",
+    "target": {
+     "source_type": "reddit",
+     "match": "g6va4n"
+    }
+   },
+   "top_chunks": [
+    "reddit-g6va4n-focykg5",
+    "video::iuOlPy_AlIA::2243",
+    "video::EaN17K9pD54::736",
+    "sos_analogue-digital-effects-gates-with-memory-1",
+    "addendum-1.6.7-mpe-support"
+   ]
+  },
+  {
+   "id": "v2-b2-q50",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-fa835f-fiwmjyn",
+    "target": {
+     "source_type": "reddit",
+     "match": "fa835f"
+    }
+   },
+   "top_chunks": [
+    "reddit-fa835f-fiwmjyn",
+    "reddit-90y35h-e2u4yt8",
+    "sos_practical-bowed-string-synthesis-inserting-the-waveform-1",
+    "manual-2.1-oscillators-oscillator-parameters",
+    "prophet6_kb_module_troubleshooting-prophet-6-module-troubleshooting-2"
+   ]
+  },
+  {
+   "id": "v2-b2-q51",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-9a7qih-e4um35n",
+    "target": {
+     "source_type": "reddit",
+     "match": "9a7qih"
+    }
+   },
+   "top_chunks": [
+    "reddit-9a7qih-e4um35n",
+    "video::E2SaU6_6ovo::3",
+    "reddit-goemix-frfs08b",
+    "patch::p6-factory-210",
+    "manual-2.1-appendix-c-midi-implementation-packed-data-format"
+   ]
+  },
+  {
+   "id": "v2-b2-q52",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-fme2ra-fl3tvpn",
+    "target": {
+     "source_type": "reddit",
+     "match": "fme2ra"
+    }
+   },
+   "top_chunks": [
+    "reddit-fme2ra-fl3tvpn",
+    "reddit-el3eti-fdghpot",
+    "sos_synthesizing-pan-pipes-set-the-right-tone-1",
+    "manual-2.1-effects-main-parameters-0",
+    "patch::p6-factory-371"
+   ]
+  },
+  {
+   "id": "v2-b2-q53",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-8a8rw6-dwwwd7u",
+    "target": {
+     "source_type": "reddit",
+     "match": "8a8rw6"
+    }
+   },
+   "top_chunks": [
+    "reddit-8a8rw6-dwwwd7u",
+    "reddit-e6jj9l-f9rkk90",
+    "reddit-lwmpkt-gpis7j6",
+    "patch::p6-factory-215",
+    "manual-2.1-appendix-d-support-troubleshooting"
+   ]
+  },
+  {
+   "id": "v2-b2-q54",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-8fsyr4-dy79b4w",
+    "target": {
+     "source_type": "reddit",
+     "match": "8fsyr4"
+    }
+   },
+   "top_chunks": [
+    "reddit-822ao3-dv9wmji",
+    "reddit-8fsyr4-dy79b4w",
+    "reddit-bvwovq-epuyj7v",
+    "patch::p6-factory-486",
+    "manual-2.1-oscillators-oscillator-parameters"
+   ]
+  },
+  {
+   "id": "v2-b2-q55",
+   "bucket": 2,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-113l9cq-j8rxuyn",
+    "target": {
+     "source_type": "reddit",
+     "match": "113l9cq"
+    }
+   },
+   "top_chunks": [
+    "reddit-113l9cq-j8rxuyn",
+    "reddit-i7e5rt-g11ihb9",
+    "reddit-bmnzuk-emyqri4",
+    "patch::p6-factory-210",
+    "manual-2.1-slop"
+   ]
+  },
+  {
+   "id": "v2-b3-q01",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-g1zkxq-fnkrdh4",
+    "target": {
+     "source_type": "reddit",
+     "match": "g1zkxq"
+    }
+   },
+   "top_chunks": [
+    "reddit-g1zkxq-fnkrdh4",
+    "reddit-binfie-em2u9xf",
+    "musicradar_minimoog_bass-how-to-make-a-minimoog-style-bass-patch-0",
+    "patch::p6-omom-162",
+    "manual-2.1-global-settings-globals-bottom-row-1"
+   ]
+  },
+  {
+   "id": "v2-b3-q02",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-ez0ti2-fgkj0xy",
+    "musicradar_minimoog_bass-how-to-make-a-minimoog-style-bass-patch-0",
+    "sos_creating_usable_synth_bass-from-wood-to-chips-0",
+    "reddit-2r57an-cnd7iu3",
+    "patch::p6-factory-067"
+   ]
+  },
+  {
+   "id": "v2-b3-q03",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-c3an6z-erpte6p",
+    "target": {
+     "source_type": "reddit",
+     "match": "c3an6z"
+    }
+   },
+   "top_chunks": [
+    "reddit-c3an6z-erpte6p",
+    "reddit-z9qda6-iyisp8j",
+    "sos_practical-percussion-synthesis-timpani-sometimes-digital-is-best-0",
+    "manual-2.1-effects",
+    "patch::p6-factory-498"
+   ]
+  },
+  {
+   "id": "v2-b3-q04",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-ehn9eo-fck9lkr",
+    "musicradar_minimoog_bass-how-to-make-a-minimoog-style-bass-patch-0",
+    "reddit-113l9cq-j8qz0hy",
+    "patch::p6-factory-465",
+    "manual-2.1-arpeggiator"
+   ]
+  },
+  {
+   "id": "v2-b3-q05",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-btbkcu-eoyhcla",
+    "reddit-m7o7ay-grcf6cz",
+    "video::E2SaU6_6ovo::3",
+    "patch::p6-factory-271",
+    "manual-2.1-globals"
+   ]
+  },
+  {
+   "id": "v2-b3-q06",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-arcwcs-egmp9xi",
+    "target": {
+     "source_type": "reddit",
+     "match": "arcwcs"
+    }
+   },
+   "top_chunks": [
+    "reddit-arcwcs-egmp9xi",
+    "reddit-mc5yqm-gs1vhte",
+    "reddit-ll2yqx-gnnfx48",
+    "reddit-c3an6z-erqd4rj",
+    "manual-2.1-slop"
+   ]
+  },
+  {
+   "id": "v2-b3-q07",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-nn87e9-gzuces3",
+    "target": {
+     "source_type": "reddit",
+     "match": "nn87e9"
+    }
+   },
+   "top_chunks": [
+    "reddit-nn87e9-gzuces3",
+    "patch::p6-factory-226",
+    "translation::minimoog",
+    "reddit-75f99r-do6t51a",
+    "manual-2.1-filters"
+   ]
+  },
+  {
+   "id": "v2-b3-q08",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-fdv54m-fjkc9il",
+    "target": {
+     "source_type": "reddit",
+     "match": "fdv54m"
+    }
+   },
+   "top_chunks": [
+    "reddit-fdv54m-fjkc9il",
+    "translation::oberheim",
+    "sos_polyphony-digital-synths-phew-now-back-to-70s-oberheims-0",
+    "patch::p6-omom-218",
+    "addendum-1.3.1-new-effects-flanger-ring-modulator-and-phaser-3"
+   ]
+  },
+  {
+   "id": "v2-b3-q09",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-c3ftag-erryv1i",
+    "target": {
+     "source_type": "reddit",
+     "match": "c3ftag"
+    }
+   },
+   "top_chunks": [
+    "reddit-c3ftag-erryv1i",
+    "reddit-bvwovq-epuyj7v",
+    "reddit-c5p60g-es4lb94",
+    "reddit-cuc8ev-extdv9y",
+    "manual-2.1-low-frequency-oscillators"
+   ]
+  },
+  {
+   "id": "v2-b3-q10",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-kzwwom-gjqb9ll",
+    "target": {
+     "source_type": "reddit",
+     "match": "kzwwom"
+    }
+   },
+   "top_chunks": [
+    "reddit-kzwwom-gjqb9ll",
+    "reddit-kjpa8i-ggy1rt4",
+    "reddit-l6eubq-gl5zquj",
+    "reddit-lxl9dp-gpob90c",
+    "addendum-1.3.1-how-to-check-a-parameter-setting-in-a-preset"
+   ]
+  },
+  {
+   "id": "v2-b3-q11",
+   "bucket": 3,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-75f99r-do6t51a",
+    "translation::minimoog",
+    "sos_brass-synthesis-minimoog-brass-synthesis-on-a-minimoog-0",
+    "patch::p6-factory-355",
+    "manual-2.1-filter-envelope"
+   ]
+  },
+  {
+   "id": "v2-b3-q12",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-75nval-doabh2s",
+    "target": {
+     "source_type": "reddit",
+     "match": "75nval"
+    }
+   },
+   "top_chunks": [
+    "reddit-75nval-doabh2s",
+    "reddit-ewwlv7-fg56tf2",
+    "reddit-f1st28-fh874j8",
+    "patch::p6-factory-310",
+    "manual-2.1-unison"
+   ]
+  },
+  {
+   "id": "v2-b3-q13",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-qrbqjs-hk9eebo",
+    "target": {
+     "source_type": "reddit",
+     "match": "qrbqjs"
+    }
+   },
+   "top_chunks": [
+    "reddit-qrbqjs-hk9eebo",
+    "reddit-lqg9mn-goh3cl0",
+    "roland_icon_juno106-5-key-features-0",
+    "patch::p6-factory-292",
+    "manual-2.1-filters"
+   ]
+  },
+  {
+   "id": "v2-b3-q14",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-rp1po4-hq38gzv",
+    "target": {
+     "source_type": "reddit",
+     "match": "rp1po4"
+    }
+   },
+   "top_chunks": [
+    "reddit-rp1po4-hq38gzv",
+    "patch::p6-omom-014",
+    "patch::p6-factory-123",
+    "patch::p6-factory-018",
+    "manual-2.1-getting-started-using-poly-chain"
+   ]
+  },
+  {
+   "id": "v2-b3-q15",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-hnzddt-fxj4s4m",
+    "target": {
+     "source_type": "reddit",
+     "match": "hnzddt"
+    }
+   },
+   "top_chunks": [
+    "reddit-hnzddt-fxj4s4m",
+    "musicradar_thriller_bass-how-to-recreate-the-classic-thriller-syn-1",
+    "reddit-bsz9c2-eosgzdw",
+    "musicradar_minimoog_bass-how-to-make-a-minimoog-style-bass-patch-0",
+    "manual-2.1-unison"
+   ]
+  },
+  {
+   "id": "v2-b3-q16",
+   "bucket": 3,
+   "hit": true,
+   "matched": {
+    "chunk_id": "reddit-m6ykpx-gr8c3mc",
+    "target": {
+     "source_type": "reddit",
+     "match": "m6ykpx"
+    }
+   },
+   "top_chunks": [
+    "reddit-m6ykpx-gr8c3mc",
+    "translation::sh-101",
+    "reddit-k942bs-gf21yt4",
+    "patch::p6-factory-472",
+    "manual-2.1-unison"
+   ]
+  },
+  {
+   "id": "v2-b5-q01",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-000",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-000"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-400",
+    "patch::p6-factory-000",
+    "patch::p6-factory-059",
+    "reddit-fn805s-fl8u713",
+    "manual-2.1-filter-envelope-changing-the-filter-envelope-s-response-curv"
+   ]
+  },
+  {
+   "id": "v2-b5-q02",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-002",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-002"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-002",
+    "patch::p6-factory-220",
+    "patch::p6-factory-021",
+    "reddit-gj2nh6-fqix94y",
+    "manual-2.1-filter-envelope-changing-the-filter-envelope-s-response-curv"
+   ]
+  },
+  {
+   "id": "v2-b5-q03",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "video::2__Oo0PobRo::63",
+    "video::j4Gy-rSANng::0",
+    "video::3wYYd9-gQI4::30",
+    "translation::dx7",
+    "reddit-j958jw-g8hismo"
+   ]
+  },
+  {
+   "id": "v2-b5-q04",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-005",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-005"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-005",
+    "patch::p6-factory-019",
+    "sos_synth_secrets_47_pwm_strings-creating-pwm-without-pwm-0",
+    "reddit-62dj0b-dfmd0mq",
+    "manual-2.1-amplifier-envelope"
+   ]
+  },
+  {
+   "id": "v2-b5-q05",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "patch::p6-factory-200",
+    "patch::p6-omom-149",
+    "patch::p6-omom-026",
+    "reddit-xjunvt-ipaszd3",
+    "manual-2.1-oscillators-oscillator-parameters"
+   ]
+  },
+  {
+   "id": "v2-b5-q06",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-013",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-013"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-013",
+    "patch::p6-factory-002",
+    "sos_synth_secrets_46_string_machines-pulse-width-modulation-1",
+    "reddit-binfie-em2itw7",
+    "addendum-1.6.7-prophet-5-rev4-style-vintage-mode"
+   ]
+  },
+  {
+   "id": "v2-b5-q07",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "video::1McsmIXkD4U::78",
+    "video::_e_nBDJNoWg::200",
+    "sos_sample-hold-sample-rate-converters-1-from-sample-hold-to-sample-rate-converte-0",
+    "reddit-11ly86w-jbexjnd",
+    "manual-2.1-low-frequency-oscillators"
+   ]
+  },
+  {
+   "id": "v2-b5-q08",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-022",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-022"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-022",
+    "reddit-hrg5nv-fy4jxta",
+    "reddit-ll2yqx-gnnbof9",
+    "patch::p6-factory-041",
+    "manual-2.1-amplifier-envelope"
+   ]
+  },
+  {
+   "id": "v2-b5-q09",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "sos_creating_usable_synth_bass-from-wood-to-chips-0",
+    "reddit-dg6al5-f3ud5g0",
+    "patch::p6-factory-086",
+    "video::xsz7bd3oBig::5",
+    "manual-2.1-unison"
+   ]
+  },
+  {
+   "id": "v2-b5-q10",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-031",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-031"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-031",
+    "sos_synthesizing-bells-the-tr808-hi-hat-0",
+    "reddit-h9gvm0-fuy3r3o",
+    "reddit-z8u3dw-iyfimcy",
+    "manual-2.1-mixer"
+   ]
+  },
+  {
+   "id": "v2-b5-q11",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-055",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-055"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-055",
+    "sos_synth_secrets_46_string_machines-shaping-the-sound-0",
+    "anwander_roland_choruses-roland-choruses-and-ensemble-effects-0",
+    "reddit-hi4s4j-fwec5uu",
+    "manual-2.1-effects"
+   ]
+  },
+  {
+   "id": "v2-b5-q12",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-059",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-059"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-059",
+    "reddit-dy7xj7-f801nkd",
+    "reddit-m57t4o-gr09tln",
+    "sos_synth_secrets_25_brass_theory-conclusion-0",
+    "manual-2.1-unison-using-chord-memory"
+   ]
+  },
+  {
+   "id": "v2-b5-q13",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-o86e3s-h33hao6",
+    "reddit-dwazln-f7hxph7",
+    "sos_synthesizing-bells-the-bell-s-sound-0",
+    "reddit-l25qli-gk48264",
+    "manual-2.1-filters"
+   ]
+  },
+  {
+   "id": "v2-b5-q14",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-factory-086",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-factory-086"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-factory-024",
+    "patch::p6-factory-086",
+    "video::j4Gy-rSANng::0",
+    "video::2__Oo0PobRo::63",
+    "reddit-ll2yqx-gnn62jg"
+   ]
+  },
+  {
+   "id": "v2-b5-q15",
+   "bucket": 5,
+   "hit": false,
+   "matched": null,
+   "top_chunks": [
+    "reddit-988sck-e4exxw4",
+    "translation::dx7",
+    "manual-2.1-poly-mod-poly-mod-parameters",
+    "reddit-dgrsuv-f3ffo2d",
+    "video::nyt3K9lkUTI::66"
+   ]
+  },
+  {
+   "id": "v2-b5-q16",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-omom-014",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-omom-014"
+    }
+   },
+   "top_chunks": [
+    "reddit-rp1po4-hq38gzv",
+    "patch::p6-omom-014",
+    "patch::p6-factory-142",
+    "translation::polysix",
+    "manual-2.1-poly-mod"
+   ]
+  },
+  {
+   "id": "v2-b5-q17",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-omom-017",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-omom-017"
+    }
+   },
+   "top_chunks": [
+    "patch::p6-omom-017",
+    "video::yT18zW_0PFs::42",
+    "video::sCBMjJ-wkrA::106",
+    "reddit-dz5208-f88aap0",
+    "manual-2.1-oscillators-oscillator-parameters"
+   ]
+  },
+  {
+   "id": "v2-b5-q18",
+   "bucket": 5,
+   "hit": true,
+   "matched": {
+    "chunk_id": "patch::p6-omom-149",
+    "target": {
+     "source_type": "patch",
+     "match": "p6-omom-149"
+    }
+   },
+   "top_chunks": [
+    "translation::arp-odyssey",
+    "patch::p6-factory-200",
+    "patch::p6-omom-149",
+    "reddit-k8gn2y-gf0uur6",
+    "manual-2.1-oscillators-oscillator-parameters"
+   ]
+  }
+ ]
+}

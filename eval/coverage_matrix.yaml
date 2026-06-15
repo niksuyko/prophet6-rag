@@ -1,0 +1,46 @@
+# Recipe coverage matrix (v2 plan, Phase A step 1).
+# [HUMAN GATE — provisional per D-021: drafted by the assistant, pending builder
+#  ratification. This matrix simultaneously defines (a) the acquisition shopping list,
+#  (b) the golden-set v2 taxonomy, and (c) the rubric for the Phase-F coverage report.]
+#
+# A cell = one instrument family x one character trait. The Phase-F report counts
+# independent corpus sources per cell (manual / reddit thread / article / patch /
+# video / translation chunks all count; multiple chunks from one source count once).
+# Success criterion 4: >= 90% of cells backed by >= 3 independent sources.
+#
+# "families" follow how players actually ask (r/synthrecipes flair conventions);
+# "characters" are the adjectives that dominate real recipe queries. Cells that are
+# musically near-nonsensical (e.g. percussive drone) are listed in `excluded_cells`
+# and don't count against coverage.
+
+families:
+  bass:       "sub, electro, acid, reese, FM-style bass"
+  lead:       "mono/solo lines, sync leads, portamento leads"
+  pad:        "sustained polyphonic beds, ambient washes"
+  strings:    "ensemble/solina-style, PWM strings, orchestral-ish"
+  brass:      "classic poly brass, stabs, horns"
+  keys:       "EP-ish, organ, clav, bell keys"
+  pluck:      "short envelope melodic, arp fodder, karplus-ish"
+  percussion: "kicks, snares, toms, hats, zaps from the synth itself"
+  fx_drone:   "risers, drones, textures, sound design one-shots"
+  arp_seq:    "patches designed for arpeggiator/sequencer motion"
+
+characters:
+  warm:       "rounded, low-pass-forward, vintage-leaning tone"
+  aggressive: "distorted, resonant, hard-sync, in-your-face"
+  vintage:    "explicitly emulating 70s/80s hardware character"
+  glassy:     "bright, bell-like, FM/sync shimmer"
+  evolving:   "movement over time: PWM, LFO, env tricks, slow morphs"
+  fat:        "unison, detune, sub-octave, stacked thickness"
+  clean:      "precise, modern, static, mix-ready"
+  emulative:  "imitating a specific other synth or a real instrument"
+
+excluded_cells:   # musically incoherent or out of P6 idiom; not counted in coverage
+  - [percussion, evolving]
+  - [percussion, emulative]
+  - [fx_drone, clean]
+  - [arp_seq, emulative]
+
+# Phase-F report: eval/coverage_report.py renders families x characters with per-cell
+# source counts, sourced from chunk metadata (synths_mentioned, recipe tags assigned
+# at chunk time) plus golden-set hit logs.

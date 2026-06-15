@@ -1,0 +1,43 @@
+# ── Secrets ───────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Large RAG corpus + index artifacts (1.3 GB; rebuildable via src/acquire/*)
+#    Not redistributed — see README "Data & reproducibility". Some sources are
+#    license-restricted (decisions.md licensing register), hence kept local.
+data/
+
+# ── Python ────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ── Local tooling / editor / OS ──────────────────────────────────────────
+.claude/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ── Personal / non-project files (kept local, not part of the deliverable) ─
+resume.tex
+# Sequential product reference photo (copyright)
+prophet6.jpg
+# personal study notes
+docs/RAG_DECISIONS_EXPLAINED.md
+
+# ── Eval artifacts containing verbatim third-party text ───────────────────
+#    Policy: publish the numbers + analysis, hold back raw scraped quotes.
+eval/chunk_qa_sample_1.md
+eval/chunk_qa_sample_1_verdicts.md
+eval/chunk_qa_sample_2.md
+eval/chunk_qa_patches_verdicts.md
+eval/judge_spotcheck_v1.md
+eval/judge_spotcheck_v2.md
+eval/results/*bakeoff*.json
+eval/results/*faithfulness*.json
+eval/results/*patch_ab*.json
+eval/results/*patch_quality_run*.json

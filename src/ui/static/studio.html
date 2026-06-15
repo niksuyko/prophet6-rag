@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Prophet-6 Studio · Patch Designer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="studio.css">
+</head>
+<body>
+
+<!-- ============================ top command bar ============================ -->
+<header class="topbar">
+  <div class="wordmark">
+    <span class="mark">PROPHET<i>·</i>6</span>
+    <span class="studio">STUDIO</span>
+  </div>
+
+  <form id="queryForm" class="cmd" autocomplete="off">
+    <svg class="cmd-ic" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M17.7 6.3l1.4-1.4M4.9 19.1l1.4-1.4" />
+      <circle cx="12" cy="12" r="4.2"/>
+    </svg>
+    <input id="queryInput" type="text"
+           placeholder="Describe a sound…  e.g. warm Juno-style chorus pad with slow movement">
+    <kbd class="cmd-hint">↵</kbd>
+    <button id="goBtn" type="submit" class="primary">
+      <span class="label">Generate</span>
+      <span class="spinner" aria-hidden="true"></span>
+    </button>
+  </form>
+
+  <div class="actions">
+    <button id="resetBtn" type="button" class="ghost" title="Return every control to the INIT patch">
+      Init
+    </button>
+    <button id="midiBtn" type="button" class="ghost midi-pill" title="MIDI output to a connected Prophet-6">
+      <span class="dot"></span> MIDI
+    </button>
+  </div>
+
+  <!-- MIDI popover (D-030 controls, restyled) -->
+  <div id="midiPanel" class="popover" hidden>
+    <div class="pop-head">
+      <span>Hardware output</span>
+      <button id="midiClose" class="x" type="button" aria-label="Close">✕</button>
+    </div>
+    <p class="pop-note">Send the generated patch to a connected Prophet-6 as one edit-buffer
+       dump. Saved programs are never overwritten.</p>
+    <button id="midiToggle" type="button" class="toggle-wide off">MIDI output is OFF</button>
+    <label class="pop-row">
+      <span>Port</span>
+      <select id="midiPort" disabled></select>
+    </label>
+    <button id="midiCapture" type="button" class="ghost wide" disabled
+            title="Read the Prophet-6's current edit buffer into the panel">
+      Capture current patch ⤓
+    </button>
+    <p id="midiHint" class="pop-hint">Web MIDI needs Chrome or Edge.</p>
+  </div>
+</header>
+
+<!-- =============================== workspace =============================== -->
+<main class="workspace">
+
+  <!-- centre: the Prophet-6 unit on a modern stage -->
+  <section class="center-col">
+    <div class="stage-bar">
+      <div id="status" class="status idle">Ready — describe a sound to begin.</div>
+      <div class="stage-tools">
+        <label class="switch" title="Dim the panel sections the patch didn't touch">
+          <input id="changesOnly" type="checkbox">
+          <span class="track"></span>
+          <span class="text">Changes only</span>
+        </label>
+        <div class="zoom" role="group" aria-label="Zoom">
+          <button id="zoomFit" type="button" class="on">Fit</button>
+          <button id="zoom100" type="button">1:1</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="stage" class="stage">
+      <div id="unit" class="unit synth">
+        <div class="cheek left"></div>
+        <main id="panel"><!-- hardware panel rendered from /api/schema --></main>
+        <div class="cheek right"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- right: the inspector -->
+  <aside class="inspector">
+    <div id="inspector" class="inspector-inner">
+      <div class="empty">
+        <div class="empty-glyph">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="22"/>
+            <circle cx="32" cy="32" r="7"/>
+            <path d="M32 10v8M32 46v8M10 32h8M46 32h8"/>
+          </svg>
+        </div>
+        <h2>Design a patch</h2>
+        <p>Type a sound description and hit <b>Generate</b>. The patch is designed from this
+           project's Prophet-6 corpus — the manual, community threads, and decoded factory
+           patches — then animated onto the panel knob by knob.</p>
+        <div class="suggest">
+          <span class="suggest-label">Try</span>
+          <button class="chip" type="button">Warm Juno-style chorus pad</button>
+          <button class="chip" type="button">Aggressive hard-sync lead</button>
+          <button class="chip" type="button">Deep round sub bass</button>
+          <button class="chip" type="button">Lush 80s analog strings</button>
+          <button class="chip" type="button">Glassy bell pluck, long release</button>
+          <button class="chip" type="button">Gritty acid mono bassline</button>
+        </div>
+        <p class="fineprint">First generation loads the embedding model — allow ~30&nbsp;s.
+           After that it's retrieval + one LLM call.</p>
+      </div>
+    </div>
+  </aside>
+
+</main>
+
+<script src="studio.js"></script>
+</body>
+</html>

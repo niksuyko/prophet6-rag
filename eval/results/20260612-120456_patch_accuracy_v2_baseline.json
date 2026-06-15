@@ -1,0 +1,603 @@
+{
+ "run": "v2_baseline",
+ "timestamp": "20260612-120456",
+ "n_queries": 18,
+ "mean_active_agreement": 0.509,
+ "mean_overall_agreement": 0.701,
+ "per_query": [
+  {
+   "id": "v2-b5-q01",
+   "query": "classic poly brass stab like the Prophet-6 factory 'Brassed Off' preset",
+   "best_ref": "p6-factory-000",
+   "overall": {
+    "n": 86,
+    "agree": 75,
+    "pct": 0.872,
+    "by_group": {
+     "effects": 0.583,
+     "envelopes": 1.0,
+     "filters": 1.0,
+     "mixer": 1.0,
+     "modulation": 1.0,
+     "oscillators": 0.818,
+     "performance": 0.733
+    }
+   },
+   "active": {
+    "n": 44,
+    "agree": 35,
+    "pct": 0.795,
+    "by_group": {
+     "effects": 0.571,
+     "envelopes": 1.0,
+     "filters": 1.0,
+     "mixer": 1.0,
+     "modulation": 1.0,
+     "oscillators": 0.75,
+     "performance": 0.429
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q02",
+   "query": "thick low analog brass patch",
+   "best_ref": "p6-factory-002",
+   "overall": {
+    "n": 86,
+    "agree": 77,
+    "pct": 0.895,
+    "by_group": {
+     "effects": 0.75,
+     "envelopes": 0.9,
+     "filters": 0.9,
+     "mixer": 1.0,
+     "modulation": 1.0,
+     "oscillators": 0.909,
+     "performance": 0.8
+    }
+   },
+   "active": {
+    "n": 32,
+    "agree": 28,
+    "pct": 0.875,
+    "by_group": {
+     "effects": 0.75,
+     "envelopes": 1.0,
+     "filters": 1.0,
+     "mixer": 1.0,
+     "modulation": 1.0,
+     "oscillators": 0.5,
+     "performance": 0.667
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q03",
+   "query": "dark octave bass on the Prophet 6",
+   "best_ref": "p6-factory-004",
+   "overall": {
+    "n": 86,
+    "agree": 61,
+    "pct": 0.709,
+    "by_group": {
+     "effects": 0.417,
+     "envelopes": 0.5,
+     "filters": 0.9,
+     "mixer": 1.0,
+     "modulation": 0.708,
+     "oscillators": 0.818,
+     "performance": 0.8
+    }
+   },
+   "active": {
+    "n": 47,
+    "agree": 23,
+    "pct": 0.489,
+    "by_group": {
+     "effects": 0.125,
+     "envelopes": 0.286,
+     "filters": 0.833,
+     "mixer": 1.0,
+     "modulation": 0.0,
+     "oscillators": 0.833,
+     "performance": 0.7
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q04",
+   "query": "warm evolving pad with slow attack and PWM movement",
+   "best_ref": "p6-factory-005",
+   "overall": {
+    "n": 86,
+    "agree": 51,
+    "pct": 0.593,
+    "by_group": {
+     "effects": 0.583,
+     "envelopes": 0.6,
+     "filters": 0.8,
+     "mixer": 0.25,
+     "modulation": 0.667,
+     "oscillators": 0.455,
+     "performance": 0.533
+    }
+   },
+   "active": {
+    "n": 49,
+    "agree": 16,
+    "pct": 0.327,
+    "by_group": {
+     "effects": 0.5,
+     "envelopes": 0.556,
+     "filters": 0.6,
+     "mixer": 0.25,
+     "modulation": 0.3,
+     "oscillators": 0.0,
+     "performance": 0.0
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q05",
+   "query": "deep hard-sync lead patch",
+   "best_ref": "p6-factory-007",
+   "overall": {
+    "n": 86,
+    "agree": 50,
+    "pct": 0.581,
+    "by_group": {
+     "effects": 0.417,
+     "envelopes": 0.4,
+     "filters": 0.8,
+     "mixer": 0.5,
+     "modulation": 0.708,
+     "oscillators": 0.636,
+     "performance": 0.467
+    }
+   },
+   "active": {
+    "n": 46,
+    "agree": 16,
+    "pct": 0.348,
+    "by_group": {
+     "effects": 0.375,
+     "envelopes": 0.0,
+     "filters": 0.667,
+     "mixer": 0.333,
+     "modulation": 0.25,
+     "oscillators": 0.429,
+     "performance": 0.333
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q06",
+   "query": "thick low strings, ensemble style",
+   "best_ref": "p6-factory-013",
+   "overall": {
+    "n": 86,
+    "agree": 79,
+    "pct": 0.919,
+    "by_group": {
+     "effects": 0.833,
+     "envelopes": 1.0,
+     "filters": 1.0,
+     "mixer": 1.0,
+     "modulation": 0.958,
+     "oscillators": 1.0,
+     "performance": 0.733
+    }
+   },
+   "active": {
+    "n": 35,
+    "agree": 29,
+    "pct": 0.829,
+    "by_group": {
+     "effects": 0.889,
+     "envelopes": 1.0,
+     "filters": 1.0,
+     "mixer": 1.0,
+     "modulation": 0.833,
+     "oscillators": 1.0,
+     "performance": 0.333
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q07",
+   "query": "slow sample-and-hold pad with random filter movement",
+   "best_ref": "p6-factory-017",
+   "overall": {
+    "n": 86,
+    "agree": 60,
+    "pct": 0.698,
+    "by_group": {
+     "effects": 0.333,
+     "envelopes": 0.5,
+     "filters": 0.9,
+     "mixer": 1.0,
+     "modulation": 0.75,
+     "oscillators": 0.818,
+     "performance": 0.733
+    }
+   },
+   "active": {
+    "n": 38,
+    "agree": 18,
+    "pct": 0.474,
+    "by_group": {
+     "effects": 0.222,
+     "envelopes": 0.429,
+     "filters": 1.0,
+     "mixer": 1.0,
+     "modulation": 0.444,
+     "oscillators": 1.0,
+     "performance": 0.333
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q08",
+   "query": "old school house organ sound",
+   "best_ref": "p6-factory-022",
+   "overall": {
+    "n": 86,
+    "agree": 75,
+    "pct": 0.872,
+    "by_group": {
+     "effects": 0.667,
+     "envelopes": 1.0,
+     "filters": 0.7,
+     "mixer": 0.75,
+     "modulation": 1.0,
+     "oscillators": 1.0,
+     "performance": 0.8
+    }
+   },
+   "active": {
+    "n": 40,
+    "agree": 30,
+    "pct": 0.75,
+    "by_group": {
+     "effects": 0.667,
+     "envelopes": 1.0,
+     "filters": 0.7,
+     "mixer": 0.667,
+     "modulation": 1.0,
+     "oscillators": 1.0,
+     "performance": 0.5
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q09",
+   "query": "solid round synth bass",
+   "best_ref": "p6-factory-024",
+   "overall": {
+    "n": 86,
+    "agree": 51,
+    "pct": 0.593,
+    "by_group": {
+     "effects": 0.417,
+     "envelopes": 0.4,
+     "filters": 0.6,
+     "mixer": 0.25,
+     "modulation": 0.792,
+     "oscillators": 0.727,
+     "performance": 0.533
+    }
+   },
+   "active": {
+    "n": 40,
+    "agree": 11,
+    "pct": 0.275,
+    "by_group": {
+     "effects": 0.25,
+     "envelopes": 0.167,
+     "filters": 0.4,
+     "mixer": 0.25,
+     "modulation": 0.0,
+     "oscillators": 0.333,
+     "performance": 0.444
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q10",
+   "query": "hi-hat percussion sound from noise",
+   "best_ref": "p6-factory-031",
+   "overall": {
+    "n": 86,
+    "agree": 55,
+    "pct": 0.64,
+    "by_group": {
+     "effects": 0.583,
+     "envelopes": 0.6,
+     "filters": 0.7,
+     "mixer": 0.25,
+     "modulation": 0.708,
+     "oscillators": 0.545,
+     "performance": 0.733
+    }
+   },
+   "active": {
+    "n": 42,
+    "agree": 13,
+    "pct": 0.31,
+    "by_group": {
+     "effects": 0.375,
+     "envelopes": 0.333,
+     "filters": 0.667,
+     "mixer": 0.25,
+     "modulation": 0.0,
+     "oscillators": 0.167,
+     "performance": 0.5
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q11",
+   "query": "classic string synth ensemble patch",
+   "best_ref": "p6-factory-055",
+   "overall": {
+    "n": 86,
+    "agree": 52,
+    "pct": 0.605,
+    "by_group": {
+     "effects": 0.5,
+     "envelopes": 0.2,
+     "filters": 0.5,
+     "mixer": 0.75,
+     "modulation": 0.875,
+     "oscillators": 0.545,
+     "performance": 0.6
+    }
+   },
+   "active": {
+    "n": 38,
+    "agree": 12,
+    "pct": 0.316,
+    "by_group": {
+     "effects": 0.444,
+     "envelopes": 0.0,
+     "filters": 0.2,
+     "mixer": 0.5,
+     "modulation": 0.5,
+     "oscillators": 0.333,
+     "performance": 0.25
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q12",
+   "query": "housey chord stab",
+   "best_ref": "p6-factory-059",
+   "overall": {
+    "n": 86,
+    "agree": 68,
+    "pct": 0.791,
+    "by_group": {
+     "effects": 0.75,
+     "envelopes": 0.6,
+     "filters": 0.8,
+     "mixer": 0.75,
+     "modulation": 0.833,
+     "oscillators": 1.0,
+     "performance": 0.733
+    }
+   },
+   "active": {
+    "n": 52,
+    "agree": 35,
+    "pct": 0.673,
+    "by_group": {
+     "effects": 0.75,
+     "envelopes": 0.333,
+     "filters": 0.75,
+     "mixer": 0.75,
+     "modulation": 0.636,
+     "oscillators": 1.0,
+     "performance": 0.556
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q13",
+   "query": "airy bell tones",
+   "best_ref": "p6-factory-061",
+   "overall": {
+    "n": 86,
+    "agree": 44,
+    "pct": 0.512,
+    "by_group": {
+     "effects": 0.25,
+     "envelopes": 0.5,
+     "filters": 0.4,
+     "mixer": 0.25,
+     "modulation": 0.667,
+     "oscillators": 0.545,
+     "performance": 0.6
+    }
+   },
+   "active": {
+    "n": 45,
+    "agree": 9,
+    "pct": 0.2,
+    "by_group": {
+     "effects": 0.0,
+     "envelopes": 0.375,
+     "filters": 0.167,
+     "mixer": 0.0,
+     "modulation": 0.222,
+     "oscillators": 0.4,
+     "performance": 0.143
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q14",
+   "query": "vintage solid bass like an old Prophet",
+   "best_ref": "p6-factory-086",
+   "overall": {
+    "n": 86,
+    "agree": 62,
+    "pct": 0.721,
+    "by_group": {
+     "effects": 0.75,
+     "envelopes": 0.6,
+     "filters": 1.0,
+     "mixer": 0.25,
+     "modulation": 0.667,
+     "oscillators": 0.727,
+     "performance": 0.8
+    }
+   },
+   "active": {
+    "n": 49,
+    "agree": 28,
+    "pct": 0.571,
+    "by_group": {
+     "effects": 0.667,
+     "envelopes": 0.5,
+     "filters": 1.0,
+     "mixer": 0.333,
+     "modulation": 0.0,
+     "oscillators": 0.714,
+     "performance": 0.778
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q15",
+   "query": "FM-style bass using poly mod",
+   "best_ref": "p6-factory-148",
+   "overall": {
+    "n": 86,
+    "agree": 41,
+    "pct": 0.477,
+    "by_group": {
+     "effects": 0.333,
+     "envelopes": 0.3,
+     "filters": 0.3,
+     "mixer": 0.5,
+     "modulation": 0.792,
+     "oscillators": 0.455,
+     "performance": 0.333
+    }
+   },
+   "active": {
+    "n": 51,
+    "agree": 12,
+    "pct": 0.235,
+    "by_group": {
+     "effects": 0.2,
+     "envelopes": 0.0,
+     "filters": 0.333,
+     "mixer": 0.333,
+     "modulation": 0.333,
+     "oscillators": 0.286,
+     "performance": 0.222
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q16",
+   "query": "church organ on an analog poly",
+   "best_ref": "p6-omom-014",
+   "overall": {
+    "n": 86,
+    "agree": 67,
+    "pct": 0.779,
+    "by_group": {
+     "effects": 0.75,
+     "envelopes": 0.7,
+     "filters": 0.6,
+     "mixer": 0.75,
+     "modulation": 0.75,
+     "oscillators": 1.0,
+     "performance": 0.867
+    }
+   },
+   "active": {
+    "n": 49,
+    "agree": 32,
+    "pct": 0.653,
+    "by_group": {
+     "effects": 0.778,
+     "envelopes": 0.625,
+     "filters": 0.25,
+     "mixer": 0.667,
+     "modulation": 0.455,
+     "oscillators": 1.0,
+     "performance": 0.667
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q17",
+   "query": "moon choir vocal pad",
+   "best_ref": "p6-omom-017",
+   "overall": {
+    "n": 86,
+    "agree": 64,
+    "pct": 0.744,
+    "by_group": {
+     "effects": 0.333,
+     "envelopes": 0.8,
+     "filters": 0.7,
+     "mixer": 0.75,
+     "modulation": 0.875,
+     "oscillators": 0.909,
+     "performance": 0.733
+    }
+   },
+   "active": {
+    "n": 50,
+    "agree": 31,
+    "pct": 0.62,
+    "by_group": {
+     "effects": 0.222,
+     "envelopes": 0.75,
+     "filters": 0.667,
+     "mixer": 0.5,
+     "modulation": 0.727,
+     "oscillators": 1.0,
+     "performance": 0.333
+    }
+   }
+  },
+  {
+   "id": "v2-b5-q18",
+   "query": "screaming sync lead for solos",
+   "best_ref": "p6-omom-149",
+   "overall": {
+    "n": 86,
+    "agree": 53,
+    "pct": 0.616,
+    "by_group": {
+     "effects": 0.333,
+     "envelopes": 0.5,
+     "filters": 0.6,
+     "mixer": 0.75,
+     "modulation": 0.708,
+     "oscillators": 0.909,
+     "performance": 0.533
+    }
+   },
+   "active": {
+    "n": 38,
+    "agree": 16,
+    "pct": 0.421,
+    "by_group": {
+     "effects": 0.25,
+     "envelopes": 0.333,
+     "filters": 0.333,
+     "mixer": 0.5,
+     "modulation": 0.429,
+     "oscillators": 0.8,
+     "performance": 0.429
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,114 @@
+{
+ "run": "v2",
+ "timestamp": "20260612-162448",
+ "n_queries": 19,
+ "total_changes": 511,
+ "cited": 234,
+ "cited_ratio": 0.458,
+ "by_source": {
+  "video": 98,
+  "general": 277,
+  "patch": 52,
+  "reddit": 47,
+  "translation": 27,
+  "manual": 3,
+  "article": 7
+ },
+ "per_query": [
+  {
+   "id": "v2-b2-q01",
+   "n_changes": 22,
+   "cited": 16
+  },
+  {
+   "id": "v2-b2-q02",
+   "n_changes": 23,
+   "cited": 6
+  },
+  {
+   "id": "v2-b2-q03",
+   "n_changes": 27,
+   "cited": 18
+  },
+  {
+   "id": "v2-b2-q04",
+   "n_changes": 31,
+   "cited": 12
+  },
+  {
+   "id": "v2-b2-q05",
+   "n_changes": 19,
+   "cited": 1
+  },
+  {
+   "id": "v2-b2-q06",
+   "n_changes": 28,
+   "cited": 10
+  },
+  {
+   "id": "v2-b2-q07",
+   "n_changes": 26,
+   "cited": 6
+  },
+  {
+   "id": "v2-b2-q08",
+   "n_changes": 31,
+   "cited": 19
+  },
+  {
+   "id": "v2-b2-q09",
+   "n_changes": 25,
+   "cited": 22
+  },
+  {
+   "id": "v2-b2-q10",
+   "n_changes": 31,
+   "cited": 1
+  },
+  {
+   "id": "v2-b2-q11",
+   "n_changes": 27,
+   "cited": 13
+  },
+  {
+   "id": "v2-b2-q12",
+   "n_changes": 24,
+   "cited": 8
+  },
+  {
+   "id": "v2-b2-q13",
+   "n_changes": 29,
+   "cited": 16
+  },
+  {
+   "id": "v2-b2-q14",
+   "n_changes": 31,
+   "cited": 22
+  },
+  {
+   "id": "v2-b2-q15",
+   "n_changes": 28,
+   "cited": 18
+  },
+  {
+   "id": "v2-b2-q16",
+   "n_changes": 28,
+   "cited": 15
+  },
+  {
+   "id": "v2-b2-q17",
+   "n_changes": 34,
+   "cited": 18
+  },
+  {
+   "id": "v2-b2-q18",
+   "n_changes": 27,
+   "cited": 8
+  },
+  {
+   "id": "v2-b2-q19",
+   "n_changes": 20,
+   "cited": 5
+  }
+ ]
+}

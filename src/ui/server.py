@@ -1,0 +1,107 @@
+"""Local web server for the Prophet-6 visual patch generator (decisions.md D-020).
+
+Stdlib only (http.server) — consistent with the project's no-extra-infrastructure rule
+(same reasoning as the NumPy vector store, D-009).
+
+Routes:
+  GET  /            -> static panel UI (src/ui/static/)
+  GET  /api/schema  -> sections + params + INIT patch (drives panel rendering)
+  POST /api/patch   -> {"query": "..."} -> generated, validated patch JSON
+
+Usage: python src/ui/server.py [port]   (default 8765; first request warms the
+embedding model, so the first patch takes a few extra seconds)
+"""
+import json
+import sys
+import threading
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+
+from patch_schema import INIT_PATCH, SECTIONS  # noqa: E402
+
+_generate_lock = threading.Lock()  # one LLM/embed call at a time keeps memory sane
+
+
+def _init_sysex():
+    """INIT edit-buffer dump so the Init button can reset the hardware too (D-030)."""
+    try:
+        sys.path.insert(0, str(HERE.parent / "patches"))
+        from encode_sysex import encode_edit_buffer
+        return encode_edit_buffer(INIT_PATCH, "INIT")
+    except Exception:
+        return None
+
+
+class Handler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=str(HERE / "static"), **kwargs)
+
+    def _send_json(self, obj: dict, status: int = 200) -> None:
+        body = json.dumps(obj).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        if self.path == "/api/schema":
+            self._send_json({"sections": SECTIONS, "init": INIT_PATCH,
+                             "init_sysex": _init_sysex()})
+        else:
+            super().do_GET()
+
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length) if length else b"{}"
+        if self.path == "/api/patch":
+            try:
+                query = json.loads(raw).get("query", "").strip()
+                if not query:
+                    self._send_json({"error": "empty query"}, 400)
+                    return
+                from generate_patch import generate_patch  # lazy heavy import
+                with _generate_lock:
+                    self._send_json(generate_patch(query))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+        elif self.path == "/api/decode":
+            self._decode_capture(raw)
+        else:
+            self._send_json({"error": "unknown endpoint"}, 404)
+
+    def _decode_capture(self, raw: bytes) -> None:
+        """Decode a captured P6 sysex dump (D-031); save it for INIT grounding."""
+        try:
+            sx = bytes(int(b) & 0xFF for b in json.loads(raw).get("sysex", []))
+            sys.path.insert(0, str(HERE.parent / "patches"))
+            from decode_sysex import decode_message
+            d = decode_message(sx)
+            if not d:
+                self._send_json({"error": "not a Prophet-6 program / edit-buffer sysex"}, 400)
+                return
+            out = {"name": d["name"], "bank": d["bank"], "program": d["program"],
+                   "params": d["params"]}
+            (HERE.parents[1] / "data" / "patches" / "captured_dump.json").write_text(
+                json.dumps(out, indent=1), encoding="utf-8")
+            self._send_json({**out, "ok": True, "bytes": len(sx)})
+        except Exception as e:
+            self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+
+    def log_message(self, fmt, *args):
+        sys.stderr.write("[ui] %s\n" % (fmt % args))
+
+
+def main() -> None:
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8765
+    server = ThreadingHTTPServer(("127.0.0.1", port), partial(Handler))
+    print(f"Prophet-6 patch panel: http://127.0.0.1:{port}")
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
