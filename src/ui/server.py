@@ -26,6 +26,7 @@ import trace_log  # noqa: E402  (observability: emit traces outside the generati
 from patch_schema import INIT_PATCH, SECTIONS  # noqa: E402
 
 _generate_lock = threading.Lock()  # one LLM/embed call at a time keeps memory sane
+LOCAL_HOSTS = {"127.0.0.1", "localhost"}  # reject non-local Host/Origin (DNS-rebinding guard)
 
 
 def _init_sysex():
@@ -50,7 +51,25 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _local_only(self) -> bool:
+        """Reject cross-origin / rebound-DNS requests before any read or side effect. The
+        server binds 127.0.0.1, so a legitimate request's Host is always local; a page on
+        another site can still issue a no-CORS POST, which this Host/Origin check blocks."""
+        host = (self.headers.get("Host") or "").rsplit(":", 1)[0]
+        if host not in LOCAL_HOSTS:
+            self._send_json({"error": "forbidden host"}, 403)
+            return False
+        origin = self.headers.get("Origin")
+        if origin:
+            from urllib.parse import urlsplit
+            if (urlsplit(origin).hostname or "") not in LOCAL_HOSTS:
+                self._send_json({"error": "forbidden origin"}, 403)
+                return False
+        return True
+
     def do_GET(self):
+        if not self._local_only():
+            return
         from urllib.parse import urlsplit, parse_qs
         parts = urlsplit(self.path)
         path, q = parts.path, parse_qs(parts.query)
@@ -96,6 +115,8 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
 
     def do_POST(self):
+        if not self._local_only():
+            return
         length = int(self.headers.get("Content-Length", 0))
         raw = self.rfile.read(length) if length else b"{}"
         if self.path == "/api/patch":

@@ -32,7 +32,10 @@ def _load() -> dict:
         for line in f:
             if not line.strip():
                 continue
-            c = json.loads(line)
+            try:
+                c = json.loads(line)
+            except json.JSONDecodeError:
+                continue  # skip a half-written / corrupt line (same discipline as trace_store)
             st = c.get("source_type")
             by_type[st] = by_type.get(st, 0) + 1
             if c.get("chunk_id"):
@@ -115,8 +118,12 @@ def _read_golden(path: Path) -> list:
         return []
     out = []
     for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
+        if not line.strip():
+            continue
+        try:
             out.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue  # skip a half-written / corrupt line (e.g. a killed promote append)
     return out
 
 
@@ -141,7 +148,7 @@ def golden_gate() -> dict:
     for path in GOLDEN_FILES:
         for g in _read_golden(path):
             total += 1
-            reach = [(t["match"].lower() in sections) if t.get("source_type") == "manual"
+            reach = [(str(t.get("match") or "").lower() in sections) if t.get("source_type") == "manual"
                      else (t.get("match") in ids) for t in g.get("expected_targets", [])]
             if g.get("expected_targets") and not any(reach):
                 unreachable.append({"id": g.get("id"), "file": path.name,
@@ -167,8 +174,9 @@ def promote(record: dict) -> dict:
         raise ValueError("record needs an integer 'bucket'")
     tgts = record.get("expected_targets")
     if not isinstance(tgts, list) or not all(
-            isinstance(t, dict) and t.get("source_type") and t.get("match") for t in tgts):
-        raise ValueError("expected_targets must be a list of {source_type, match}")
+            isinstance(t, dict) and t.get("source_type") and isinstance(t.get("match"), str)
+            and t.get("match") for t in tgts):
+        raise ValueError("expected_targets must be a list of {source_type, match:str}")
     existing = {g.get("id") for g in _read_golden(GOLDEN_V2)}
     if rid in existing:
         raise ValueError(f"id {rid!r} already in golden_set_v2.jsonl")

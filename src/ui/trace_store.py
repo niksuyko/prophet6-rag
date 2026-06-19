@@ -98,7 +98,9 @@ def get(trace_id: str) -> dict | None:
         return None
     day = str(trace_id)[:8]
     primary = TRACE_DIR / f"{day}.jsonl"
-    files = [primary] if primary.exists() else _day_files()
+    # only trust the day-embedded fast path for a well-formed 8-digit day (no traversal);
+    # otherwise fall back to scanning the trace dir's own files.
+    files = [primary] if (day.isdigit() and len(day) == 8 and primary.exists()) else _day_files()
     for path in files:
         try:
             for line in path.read_text(encoding="utf-8").splitlines():
@@ -122,6 +124,7 @@ def aggregate(window: int = 200) -> dict:
     def rate(pred):
         return round(sum(1 for s in ok if pred(s)) / no, 3)
     cc = [s["change_count"] for s in ok if isinstance(s.get("change_count"), int)]
+    w = [s["wall_ms"] for s in ok if s.get("wall_ms")]
     return {
         "n_traces": n,
         "n_ok": len(ok),
@@ -134,6 +137,5 @@ def aggregate(window: int = 200) -> dict:
         "sysex_fail_rate": rate(lambda s: not s["sysex_ok"]),
         "error_rate": round((n - len(ok)) / (n or 1), 3),
         "mean_change_count": round(sum(cc) / len(cc), 1) if cc else None,
-        "mean_wall_ms": round(sum(s["wall_ms"] for s in ok if s.get("wall_ms"))
-                              / no) if ok else None,
+        "mean_wall_ms": round(sum(w) / len(w)) if w else None,
     }

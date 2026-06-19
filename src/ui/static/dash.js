@@ -435,7 +435,13 @@ register({
       chips.innerHTML = "";
       FILTERS.forEach(f => {
         const c = el("button", "chip" + (f === active ? " on" : ""), esc(f));
-        c.onclick = () => { active = f; load(); };
+        c.onclick = () => {
+          active = f;
+          if (CURRENT) CURRENT.params.filter = f === "all" ? undefined : f;  // survive Refresh
+          const qs = new URLSearchParams({ v: "trace", ...(selected ? { id: selected } : {}), ...(f !== "all" ? { filter: f } : {}) });
+          history.replaceState(null, "", "?" + qs);
+          load();
+        };
         chips.appendChild(c);
       });
       body.innerHTML = `<div class="muted pad">loading…</div>`;
@@ -482,7 +488,7 @@ function chunkList(chunks, targetMatch) {
     `<li class="${c === tgt ? "is-target" : ""}">${esc(c)}${c === tgt ? " ← target" : ""}</li>`).join("") + `</ol>`;
 }
 function showRecallMiss(rail, it) {
-  const tgt = (it.detail_a.matched || {});
+  const tgt = (it.detail_a.matched || it.detail_b.matched || {});  // B supplies it for MISS→HIT rows
   rail.innerHTML = `<p class="rail-title">${esc(it.id)} · recall</p>` +
     kv([["A", recallWord(it.a)], ["B", recallWord(it.b)], ["target", tgt.chunk_id]]) +
     `<div class="section-title">A · top-5</div>` + chunkList(it.detail_a.top_chunks, tgt) +
@@ -736,6 +742,9 @@ function openPromote(rec) {
 function boot() {
   const q = new URLSearchParams(location.search);
   $("#refreshBtn").onclick = () => go(CURRENT ? CURRENT.id : DEFAULT_VIEW, CURRENT ? CURRENT.params : {});
-  go(q.get("v") || DEFAULT_VIEW, q.get("id") ? { id: q.get("id") } : {});
+  const params = {};
+  if (q.get("id")) params.id = q.get("id");
+  if (q.get("filter")) params.filter = q.get("filter");
+  go(q.get("v") || DEFAULT_VIEW, params);
 }
 boot();

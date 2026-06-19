@@ -68,7 +68,7 @@
 .stage-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
   margin-bottom: 4px; }
 .stage-head h1 { font-size: 22px; font-weight: 700; letter-spacing: -.2px; margin: 0; }
-.stage-head .qq { color: var(--text-faint); font-size: 12px; font-style: italic; }
+.qq { color: var(--text-faint); font-size: 12px; font-style: italic; }
 .envelope { display: flex; flex-wrap: wrap; gap: 8px 16px; font: 500 11.5px/1 "JetBrains Mono", monospace;
   color: var(--text-dim); margin: 8px 0 18px; }
 .envelope b { color: var(--text); font-weight: 600; }

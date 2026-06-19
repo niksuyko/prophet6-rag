@@ -405,6 +405,8 @@ A **sibling page** of the patch panel, not a new product. The cardinal rule (fro
 
 ### 5.1 Token strategy: shared `base.css`
 
+> **Implementation note (as built):** `base.css` was created as the modern-surround foundation and is `<link>`ed by `dash.html`. `studio.html`/`studio.css` were **intentionally left untouched** — stripping the duplicated tokens out of the working hardware panel carried regression risk that can't be verified without a browser, for a DRY win. The result is ~40 lines of token duplication between `studio.css` and `base.css`; re-pointing `studio.html` to `base.css` (and deleting the duplicated block from `studio.css`) remains an optional future refactor. The mentions of re-pointing `studio.html` in §5.1/§6/M1 below describe that intended end-state, not the shipped code.
+
 Factor the modern-surround `:root` half of `studio.css` (explicitly excluding the hardware-face block) into `src/ui/static/base.css`, `<link>`ed by both `studio.html` and `dash.html`. `dash.css` then adds only the few widgets Studio lacks (sparkline, score-bar table, heatmap, diff viewer). Reuse the body canvas verbatim:
 
 ```css
