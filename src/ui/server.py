@@ -76,6 +76,13 @@ class Handler(SimpleHTTPRequestHandler):
             elif path == "/api/overview":
                 import eval_store
                 self._send_json(eval_store.overview())
+            elif path == "/api/eval/runs":
+                import eval_store
+                self._send_json({"runs": eval_store.list_runs((q.get("kind") or [None])[0])})
+            elif path == "/api/eval/diff":
+                import eval_store
+                a, b = (q.get("a") or [""])[0], (q.get("b") or [""])[0]
+                self._send_json(eval_store.diff(a, b))
             else:
                 self._send_json({"error": "unknown endpoint"}, 404)
         except Exception as e:

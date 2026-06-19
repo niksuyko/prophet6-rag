@@ -92,6 +92,83 @@ def summarize(d: dict, kind: str) -> dict:
     }
 
 
+def _pq_value(kind: str, q: dict):
+    if kind == "recall":
+        return 1.0 if q.get("hit") else 0.0
+    if kind == "patch_accuracy":
+        return (q.get("overall") or {}).get("pct")
+    return None
+
+
+def _pq_detail(kind: str, q: dict) -> dict:
+    if kind == "recall":
+        return {"matched": q.get("matched"), "top_chunks": q.get("top_chunks")}
+    if kind == "patch_accuracy":
+        return {"pct": (q.get("overall") or {}).get("pct"),
+                "by_group": (q.get("overall") or {}).get("by_group")}
+    return {}
+
+
+def _bucket_value(b: dict):
+    if not isinstance(b, dict):
+        return None
+    for key in ("recall", "pct", "faithful_pct"):
+        if key in b:
+            return b[key]
+    return None
+
+
+def diff(file_a: str, file_b: str) -> dict:
+    """Per-bucket + per-query delta between two same-kind runs. Powers the Run-Diff view —
+    the per-query list is where a HIT→MISS regression and its displacing chunk surface."""
+    da, db = load_run(file_a), load_run(file_b)
+    ka, kb = _parse_name(file_a)[1], _parse_name(file_b)[1]
+    if ka != kb:
+        raise ValueError(f"runs are different kinds ({ka} vs {kb}); diff needs matching kinds")
+    kind = ka
+    _, va, fmt, target, direction = _scalar(da, kind)
+    metric, vb, _, _, _ = _scalar(db, kind)
+
+    ba, bb = da.get("per_bucket") or {}, db.get("per_bucket") or {}
+    buckets = []
+    for key in sorted(set(ba) | set(bb)):
+        av, bv = _bucket_value(ba.get(key, {})), _bucket_value(bb.get(key, {}))
+        buckets.append({"bucket": key, "a": av, "b": bv,
+                        "delta": round(bv - av, 3) if av is not None and bv is not None else None})
+
+    qa = {q["id"]: q for q in da.get("per_query", []) if "id" in q}
+    qb = {q["id"]: q for q in db.get("per_query", []) if "id" in q}
+    common = sorted(set(qa) & set(qb))
+    regressed, improved = [], []
+    for qid in common:
+        av, bv = _pq_value(kind, qa[qid]), _pq_value(kind, qb[qid])
+        if av is None or bv is None:
+            continue
+        if bv < av - 1e-9:
+            regressed.append({"id": qid, "bucket": qa[qid].get("bucket"), "a": av, "b": bv,
+                              "detail_a": _pq_detail(kind, qa[qid]),
+                              "detail_b": _pq_detail(kind, qb[qid])})
+        elif bv > av + 1e-9:
+            improved.append({"id": qid, "bucket": qb[qid].get("bucket"), "a": av, "b": bv,
+                             "detail_a": _pq_detail(kind, qa[qid]),
+                             "detail_b": _pq_detail(kind, qb[qid])})
+
+    tripwire = None
+    if kind == "recall":
+        tripwire = {"target": 0.95, "value": vb, "pass": vb is not None and vb >= 0.95,
+                    "note": "D-029: a MISS may be an eval-staleness collision — inspect the "
+                            "displaced top_chunks before treating it as a real regression; "
+                            "never re-target a golden entry mid-run (D-015)."}
+    return {
+        "kind": kind, "metric": metric, "fmt": fmt, "target": target, "direction": direction,
+        "a": {"file": file_a, "ts": da.get("timestamp"), "label": da.get("run") or da.get("label"), "value": va},
+        "b": {"file": file_b, "ts": db.get("timestamp"), "label": db.get("run") or db.get("label"), "value": vb},
+        "delta": round(vb - va, 4) if va is not None and vb is not None else None,
+        "per_bucket": buckets, "regressed": regressed, "improved": improved,
+        "n_common": len(common), "tripwire": tripwire,
+    }
+
+
 # kinds shown as headline KPI tiles on the Overview, in display order.
 OVERVIEW_KINDS = ["recall", "coverage", "provenance", "patch_accuracy", "faithfulness", "bakeoff"]
 

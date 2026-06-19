@@ -460,6 +460,115 @@ register({
 });
 
 /* ====================================================================== *
+ *  RUN-DIFF (M3)                                                         *
+ * ====================================================================== */
+function labelWrap(label, node) {
+  const w = el("label", "field");
+  w.appendChild(el("span", "field-k", esc(label)));
+  w.appendChild(node);
+  return w;
+}
+const deltaCls = (d, dir) => d == null || d === 0 ? "" : ((dir === "high" ? d > 0 : d < 0) ? "t-ok" : "t-bad");
+const fmtDelta = d => d == null ? "—" : (d > 0 ? "+" : "") + Number(d).toFixed(3);
+const recallWord = v => v === 1 ? "hit" : v === 0 ? "miss" : v;
+
+function chunkList(chunks, targetMatch) {
+  const tgt = targetMatch && targetMatch.chunk_id;
+  if (!chunks || !chunks.length) return `<div class="empty-note">— none —</div>`;
+  return `<ol class="chunklist">` + chunks.map(c =>
+    `<li class="${c === tgt ? "is-target" : ""}">${esc(c)}${c === tgt ? " ← target" : ""}</li>`).join("") + `</ol>`;
+}
+function showRecallMiss(rail, it) {
+  const tgt = (it.detail_a.matched || {});
+  rail.innerHTML = `<p class="rail-title">${esc(it.id)} · recall</p>` +
+    kv([["A", recallWord(it.a)], ["B", recallWord(it.b)], ["target", tgt.chunk_id]]) +
+    `<div class="section-title">A · top-5</div>` + chunkList(it.detail_a.top_chunks, tgt) +
+    `<div class="section-title">B · top-5</div>` + chunkList(it.detail_b.top_chunks, tgt) +
+    `<div class="tip" style="margin-top:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>If the target dropped out of B's top-5, the chunks now above it are the displacers (D-027). If the target itself looks wrong, this is eval-staleness — re-target the golden entry, don't chase recall (D-015/D-029).</div>`;
+}
+
+function renderDiff(d, out, rail) {
+  const dir = d.direction || "high";
+  const good = d.delta == null ? null : (dir === "high" ? d.delta >= 0 : d.delta <= 0);
+  const dcls = d.delta == null || d.delta === 0 ? "" : (good ? "delta-pos" : "delta-neg");
+  out.innerHTML =
+    `<div class="diff-band"><div><div class="k">${esc(d.metric)}</div>` +
+    `<div class="band-vals"><span class="mono">${esc(fmtVal(d.a.value, d.fmt))}</span> → ` +
+    `<span class="mono">${esc(fmtVal(d.b.value, d.fmt))}</span></div></div>` +
+    `<div class="band-delta ${dcls}">${esc(fmtDelta(d.delta))}</div></div>` +
+    `<div class="muted" style="margin:8px 0 4px">A: ${esc(d.a.label)} (${esc(d.a.ts)}) · B: ${esc(d.b.label)} (${esc(d.b.ts)}) · ${d.n_common} shared queries</div>` +
+    (d.n_common === 0 ? `<div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>These two runs share no query ids — likely different golden sets (e.g. v1 vs v2). Headline and per-bucket deltas still apply; pick two runs of the same set for a per-query regression list.</div>` : "");
+
+  if (d.tripwire) {
+    const tw = d.tripwire;
+    out.innerHTML += `<div class="${tw.pass ? "tip" : "problems"}"><b>v1 tripwire ${tw.pass ? "PASS" : "FAIL"}</b> — ` +
+      `${esc(fmtVal(tw.value, "ratio"))} vs ${tw.target}. ${esc(tw.note)}</div>`;
+  }
+  if (d.per_bucket.length) {
+    out.innerHTML += `<div class="section-title">Per-bucket</div><table class="tbl"><tr><th>bucket</th><th>A</th><th>B</th><th>Δ</th></tr>` +
+      d.per_bucket.map(b => `<tr><td class="cid">${esc(b.bucket)}</td><td>${b.a ?? "—"}</td><td>${b.b ?? "—"}</td>` +
+        `<td class="${deltaCls(b.delta, dir)}">${esc(fmtDelta(b.delta))}</td></tr>`).join("") + `</table>`;
+  }
+  const sect = (title, items, sign) => {
+    let h = `<div class="section-title">${title}</div>`;
+    if (!items.length) return h + `<div class="empty-note">none</div>`;
+    return h + `<div class="reg-list">` + items.map((it, i) =>
+      `<div class="reg-row ${sign}" data-i="${i}" data-sign="${sign}"><span class="cid mono">${esc(it.id)}</span>` +
+      `<span class="muted">b${it.bucket ?? "?"}</span>` +
+      `<span class="mono">${esc(d.kind === "recall" ? recallWord(it.a) : it.a)} → ${esc(d.kind === "recall" ? recallWord(it.b) : it.b)}</span></div>`).join("") + `</div>`;
+  };
+  out.innerHTML += sect(`Regressed (${d.regressed.length})`, d.regressed, "neg") +
+    sect(`Improved (${d.improved.length})`, d.improved, "pos");
+
+  if (d.kind === "recall") {
+    $$(".reg-row", out).forEach(row => {
+      row.style.cursor = "pointer";
+      row.onclick = () => {
+        const items = row.dataset.sign === "neg" ? d.regressed : d.improved;
+        showRecallMiss(rail, items[+row.dataset.i]);
+      };
+    });
+  }
+}
+
+register({
+  id: "diff", label: "Run-Diff",
+  mount: async (main, rail, params) => {
+    setStatus("working", "loading eval runs…");
+    const { runs } = await jget("/api/eval/runs");
+    setStatus("done", `${runs.length} eval runs`);
+    if (!runs.length) { main.appendChild(el("div", "ov", "<div class='empty-note'>No eval results to diff.</div>")); return; }
+    const kinds = [...new Set(runs.map(r => r.kind))];
+    const ov = el("div", "ov"); main.appendChild(ov);
+    const pick = el("div", "picker-row"); ov.appendChild(pick);
+    const kindSel = el("select", "sel"), aSel = el("select", "sel"), bSel = el("select", "sel");
+    kinds.forEach(k => kindSel.add(new Option(k, k)));
+    pick.append(labelWrap("metric", kindSel), labelWrap("baseline · A", aSel), labelWrap("candidate · B", bSel));
+    const outWrap = el("div"); outWrap.style.marginTop = "18px"; ov.appendChild(outWrap);
+
+    async function run() {
+      if (aSel.value === bSel.value) { outWrap.innerHTML = `<div class="tip">Pick two different runs to compare.</div>`; return; }
+      outWrap.innerHTML = `<div class="empty-note">loading diff…</div>`;
+      try {
+        const d = await jget(`/api/eval/diff?a=${encodeURIComponent(aSel.value)}&b=${encodeURIComponent(bSel.value)}`);
+        renderDiff(d, outWrap, rail);
+      } catch (e) { outWrap.innerHTML = `<div class="problems">${esc(e.message)}</div>`; }
+    }
+    function fillRuns() {
+      const rs = runs.filter(r => r.kind === kindSel.value);  // newest first
+      [aSel, bSel].forEach(s => { s.innerHTML = ""; rs.forEach(r => s.add(new Option(`${r.ts || "?"} · ${r.label}`, r.file))); });
+      bSel.selectedIndex = 0;
+      aSel.selectedIndex = Math.min(1, rs.length - 1);
+      run();
+    }
+    kindSel.onchange = fillRuns; aSel.onchange = run; bSel.onchange = run;
+    kindSel.value = params.kind && kinds.includes(params.kind) ? params.kind
+      : (kinds.includes("recall") ? "recall" : kinds[0]);
+    fillRuns();
+  },
+});
+
+/* ====================================================================== *
  *  BOOT                                                                  *
  * ====================================================================== */
 function boot() {
