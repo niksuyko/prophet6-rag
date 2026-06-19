@@ -619,7 +619,8 @@ async function captureFromP6() {
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || res.statusText);
       applyParams(data.params);
-      setStatus(`Captured “${data.name || "patch"}” (${data.bytes} bytes) — decoded to panel`, "done");
+      setStatus(`Captured “${data.name || "patch"}” (${data.bytes} bytes) — decoded to panel`
+        + (data.file ? ` + saved as ${data.file}` : ""), "done");
     } catch (err) { setStatus(`Capture decode failed: ${err.message || err}`, "error"); }
   };
   input.onmidimessage = (e) => {

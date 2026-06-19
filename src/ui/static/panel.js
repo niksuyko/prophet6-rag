@@ -130,7 +130,7 @@ async function captureFromP6() {
       applyParams(data.params);
       console.log("[midi] captured patch:", data);
       setStatus(`captured "${data.name || "patch"}" (${data.bytes} bytes) — `
-        + "decoded to panel + saved to data/patches/captured_dump.json");
+        + `decoded to panel + saved to data/patches/${data.file || "captured_dump.json"}`);
     } catch (err) {
       setStatus(`capture decode failed: ${err.message || err}`);
     }

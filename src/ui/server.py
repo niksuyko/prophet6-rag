@@ -156,7 +156,10 @@ class Handler(SimpleHTTPRequestHandler):
             self._send_json({"error": "unknown endpoint"}, 404)
 
     def _decode_capture(self, raw: bytes) -> None:
-        """Decode a captured P6 sysex dump (D-031); save it for INIT grounding."""
+        """Decode a captured P6 sysex dump (D-031). Writes the latest to captured_dump.json
+        (INIT grounding, back-compat) AND a timestamped, raw-byte-preserving copy per capture
+        so two dumps can be byte-diffed to resolve the FX byte-map (ISSUE-3) via
+        src/patches/diff_captures.py."""
         try:
             sx = bytes(int(b) & 0xFF for b in json.loads(raw).get("sysex", []))
             sys.path.insert(0, str(HERE.parent / "patches"))
@@ -165,11 +168,18 @@ class Handler(SimpleHTTPRequestHandler):
             if not d:
                 self._send_json({"error": "not a Prophet-6 program / edit-buffer sysex"}, 400)
                 return
+            # full 1024-byte internal layout (what LAYOUT offsets index into) — needed for diffs
             out = {"name": d["name"], "bank": d["bank"], "program": d["program"],
-                   "params": d["params"]}
-            (HERE.parents[1] / "data" / "patches" / "captured_dump.json").write_text(
-                json.dumps(out, indent=1), encoding="utf-8")
-            self._send_json({**out, "ok": True, "bytes": len(sx)})
+                   "params": d["params"], "bytes": list(d["_data"])}
+            patch_dir = HERE.parents[1] / "data" / "patches"
+            patch_dir.mkdir(parents=True, exist_ok=True)
+            fname = f"capture-{trace_log.new_id()}.json"  # ts + random suffix → no collisions
+            body = json.dumps(out, indent=1)
+            (patch_dir / "captured_dump.json").write_text(body, encoding="utf-8")  # latest
+            (patch_dir / fname).write_text(body, encoding="utf-8")                 # per-capture, diffable
+            # response stays lean — never ship the 1024-byte array to the browser
+            self._send_json({k: out[k] for k in ("name", "bank", "program", "params")}
+                            | {"ok": True, "bytes": len(sx), "file": fname})
         except Exception as e:
             self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
 
