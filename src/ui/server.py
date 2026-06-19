@@ -51,11 +51,32 @@ class Handler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        if self.path == "/api/schema":
+        from urllib.parse import urlsplit, parse_qs
+        parts = urlsplit(self.path)
+        path, q = parts.path, parse_qs(parts.query)
+        if path == "/api/schema":
             self._send_json({"sections": SECTIONS, "init": INIT_PATCH,
                              "init_sysex": _init_sysex()})
+        elif path.startswith("/api/"):
+            self._api_get(path, q)
         else:
             super().do_GET()
+
+    def _api_get(self, path: str, q: dict) -> None:
+        """Read-only dashboard endpoints (file-backed, no pipeline state mutated)."""
+        try:
+            import trace_store
+            if path == "/api/traces":
+                limit = int((q.get("limit") or ["200"])[0])
+                self._send_json({"traces": trace_store.iter_summaries(
+                    limit=limit, filt=(q.get("filter") or [None])[0])})
+            elif path == "/api/trace":
+                rec = trace_store.get((q.get("id") or [""])[0])
+                self._send_json(rec or {"error": "trace not found"}, 200 if rec else 404)
+            else:
+                self._send_json({"error": "unknown endpoint"}, 404)
+        except Exception as e:
+            self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))

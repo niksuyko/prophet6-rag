@@ -1,0 +1,347 @@
+/* Prophet-6 Observability dashboard — vanilla JS, same fetch/render idiom as studio.js.
+   A view registry (VIEWS) drives the nav; each milestone appends a view. No framework. */
+
+const $ = (s, p = document) => p.querySelector(s);
+const $$ = (s, p = document) => [...p.querySelectorAll(s)];
+const el = (tag, cls, html) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html != null) e.innerHTML = html;
+  return e;
+};
+const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g,
+  c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function jget(url) {
+  const r = await fetch(url);
+  let d = {};
+  try { d = await r.json(); } catch { /* non-json error body */ }
+  if (!r.ok || d.error) throw new Error(d.error || `HTTP ${r.status}`);
+  return d;
+}
+function setStatus(cls, text) { const s = $("#status"); s.className = "status " + cls; s.textContent = text; }
+
+/* ---- shared formatting ---- */
+const PROV = ["manual", "official_kb", "reddit", "patch", "article", "general"];
+function stacked(dist, big) {
+  const total = Object.values(dist || {}).reduce((a, b) => a + b, 0);
+  if (!total) return `<div class="stacked${big ? " lg" : ""}"></div>`;
+  const segs = PROV.filter(k => dist[k]).map(k =>
+    `<span class="seg-${k}" style="width:${(dist[k] / total * 100).toFixed(1)}%" title="${k}: ${dist[k]}"></span>`);
+  // include any unexpected keys at the end
+  Object.keys(dist).filter(k => !PROV.includes(k) && dist[k]).forEach(k =>
+    segs.push(`<span class="seg-general" style="width:${(dist[k] / total * 100).toFixed(1)}%" title="${esc(k)}: ${dist[k]}"></span>`));
+  return `<div class="stacked${big ? " lg" : ""}">${segs.join("")}</div>`;
+}
+function provLegend(dist) {
+  const cols = { manual: "#7fd08a", official_kb: "#7fd08a", reddit: "#ff9d5c", patch: "#6fb8ff", article: "#4a5160", general: "#9aa3b2" };
+  return `<div class="legend">${Object.entries(dist || {}).map(([k, v]) =>
+    `<span><i style="background:${cols[k] || "#9aa3b2"}"></i>${esc(k)} ${v}</span>`).join("")}</div>`;
+}
+function kv(rows) {  // rows: [[label, value, cls?], …]
+  return `<dl class="kv">${rows.filter(Boolean).map(([k, v, c]) =>
+    `<dt>${esc(k)}</dt><dd${c ? ` class="${c}"` : ""}>${v == null || v === "" ? "—" : esc(v)}</dd>`).join("")}</dl>`;
+}
+function rawJSON(obj) {
+  const j = JSON.stringify(obj, null, 2)
+    .replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]))
+    .replace(/^(\s*)("[^"]+")(:)/gm, '$1<span class="k">$2</span>$3');
+  return `<pre class="rawbox">${j}</pre>`;
+}
+
+/* ====================================================================== *
+ *  ROUTER                                                                *
+ * ====================================================================== */
+const VIEWS = [];
+let DEFAULT_VIEW = "trace";
+function register(v) { VIEWS.push(v); }
+function renderNav(active) {
+  const n = $("#nav"); n.innerHTML = "";
+  VIEWS.forEach(v => {
+    const b = el("button", v.id === active ? "on" : "", esc(v.label));
+    b.onclick = () => go(v.id);
+    n.appendChild(b);
+  });
+}
+let CURRENT = null;
+async function go(id, params = {}) {
+  const v = VIEWS.find(x => x.id === id) || VIEWS.find(x => x.id === DEFAULT_VIEW) || VIEWS[0];
+  CURRENT = { id: v.id, params };
+  renderNav(v.id);
+  const qs = new URLSearchParams({ v: v.id, ...(params.id ? { id: params.id } : {}) });
+  history.replaceState(null, "", "?" + qs.toString());
+  const main = $("#main"), rail = $("#rail");
+  main.innerHTML = ""; rail.innerHTML = `<p class="rail-title">Inspector</p>`;
+  try {
+    await v.mount(main, rail, params);
+  } catch (e) {
+    setStatus("error", e.message);
+    main.appendChild(el("div", "problems", "Failed to load view: " + esc(e.message)));
+  }
+}
+
+/* ====================================================================== *
+ *  TRACE EXPLORER (M1)                                                   *
+ * ====================================================================== */
+const FILTERS = ["all", "no-patch", "all-general", "clamped", "salvage", "hallucinated-cite", "sysex-fail", "error"];
+
+function rowHealth(t) {
+  if (!t.ok || t.all_general || !t.sysex_ok) return "bad";
+  if (t.n_clamped || t.salvaged || !t.patch_served || t.n_unmatched || t.mixer_all_down) return "warn";
+  return "ok";
+}
+function traceRow(t, onClick, selected) {
+  const r = el("div", `trace-row ${rowHealth(t)}${selected ? " sel" : ""}`);
+  const flags = [];
+  if (!t.ok) flags.push("err");
+  if (t.all_general) flags.push("all-gen");
+  else if (!t.patch_served) flags.push("no-patch");
+  if (t.salvaged) flags.push("salvage");
+  if (t.n_clamped) flags.push(t.n_clamped + " clamp");
+  r.innerHTML =
+    `<div class="q">${esc(t.query || "(no query)")}</div>` +
+    stacked(t.source_distribution) +
+    `<div class="row2"><span class="ts">${esc(t.ts || "")}</span>` +
+    `<span class="flags mono muted">${esc(flags.join(" · "))}</span></div>`;
+  r.onclick = onClick;
+  return r;
+}
+
+/* --- stage renderers: each returns {status, hl, body, lever, raw} --- */
+const cls = (v, warn, bad) => (bad ? "bad" : warn ? "warn" : "ok");
+const STAGES = [
+  ["classify", "Query & classification", rec => {
+    const c = rec.classify || {};
+    return { status: "ok", hl: c.recipe_shaped ? "recipe-shaped" : "factual",
+      body: kv([["recipe_shaped", String(c.recipe_shaped)],
+                ["note", "patch path always treats query as recipe-shaped — this flag is diagnostic only (matters for ask.py)"]]),
+      lever: "Retrieval mode (regex) — affects Q&A path only", raw: c };
+  }],
+  ["pool", "Retrieval pool (k=25)", rec => {
+    const p = rec.pool || {}; const lanes = p.per_lane_contribution_counts || {};
+    const patchN = lanes.patch || 0;
+    const rows = (p.pool_chunks || []).slice(0, 8).map(c =>
+      `<tr><td class="cid">${esc(c.chunk_id)}</td><td><span class="badge ${esc(c.source_type)}">${esc(c.source_type)}</span></td>` +
+      `<td>${(c.rrf ?? 0).toFixed?.(4) ?? c.rrf}</td><td>${(c.sim ?? 0)}</td></tr>`).join("");
+    return { status: cls(0, patchN === 0, false), hl: `patch lane ${patchN}`,
+      body: kv([["lanes", (p.lanes_present_in_pool || []).join(", ")],
+                ["per-lane counts", JSON.stringify(lanes)],
+                ["similarity range", (p.top_similarity_range || []).join(" – ")]]) +
+        (rows ? `<table class="tbl" style="margin-top:9px"><tr><th>chunk</th><th>lane</th><th>rrf</th><th>sim</th></tr>${rows}</table>` : ""),
+      lever: patchN === 0 ? "Corpus — no patch exemplar reached the pool for this sound" : "Retrieval mode",
+      raw: p };
+  }],
+  ["rerank", "Actionability rerank + RRF", rec => {
+    const r = rec.rerank || {}; const ov = (r.deduped_to_overflow || []).length;
+    const swaps = (r.rank_before_after || []).filter(x => x[1] !== x[2]).length;
+    return { status: "ok", hl: `${swaps} reordered`,
+      body: kv([["chunks deduped to overflow", ov],
+                ["reordered by actionability", swaps],
+                ["note", "full per-chunk actionability components in the raw record →"]]),
+      lever: "Retrieval mode — tune _PARAM_TERMS / _CHATTER / ACTION_WEIGHT", raw: r };
+  }],
+  ["diversify", "Diversity injection", rec => {
+    const d = rec.diversify || {}; const o = d.patch_injection_outcome;
+    const bad = o === "no_candidate_in_pool" || o === "all_below_floor";
+    const below = d.candidates_below_floor || [];
+    return { status: cls(0, false, bad), hl: o || "—",
+      body: kv([["patch_injection_outcome", o, bad ? "bad" : "ok"],
+                ["groups satisfied", (d.groups_already_satisfied || []).join(", ")],
+                ["injected swaps", (d.injected_swaps || []).length],
+                ["candidates below floor", below.length ? below.map(c => `${c.chunk_id}(${c.action})`).join(", ") : "none",
+                 below.length ? "warn" : ""]]),
+      lever: o === "all_below_floor" ? "Retrieval mode — lower ACTION_FLOOR / widen _PARAM_TERMS"
+        : bad ? "Corpus — acquire patch exemplars for this sound" : "—",
+      raw: d };
+  }],
+  ["adapt", "Grounding block (retrieve-and-adapt)", rec => {
+    const a = rec.adapt || {}; const ids = a.patch_ids_selected || [];
+    const ne = a.neighbor_outcome || ""; const neBad = ne.startsWith("Exception");
+    return { status: cls(0, ids.length === 0 || neBad, false), hl: `${a.num_patch_exemplars ?? 0} exemplars`,
+      body: kv([["patch_ids_selected", ids.join(", "), ids.length ? "" : "warn"],
+                ["files missing", (a.patch_files_missing || []).join(", ")],
+                ["neighbor_outcome", ne, neBad ? "bad" : ""],
+                ["neighbor_distance", a.neighbor_distance],
+                ["block size (chars)", a.block_char_len]]),
+      lever: ids.length === 0 ? "Corpus / retrieval — model had no real patch to adapt"
+        : neBad ? "Corpus — patch JSON integrity (neighbor expansion threw)" : "—",
+      raw: a };
+  }],
+  ["prompt", "Prompt assembly", rec => {
+    const p = rec.prompt || {}; const big = (p.prompt_total_chars || 0) > 14000;
+    return { status: cls(0, big, false), hl: `${p.prompt_total_chars ?? "?"} chars`,
+      body: kv([["context chunks", p.num_context_chunks],
+                ["est. input tokens", p.est_input_tokens],
+                ["schema present", String(p.schema_present)],
+                ["labels", (p.chunk_labels_in_prompt || []).join(", ")]]),
+      lever: big ? "System prompt — trim real_patch_block to leave output headroom" : "—", raw: p };
+  }],
+  ["llm", "LLM output", rec => {
+    const l = rec.llm || {}; const trunc = l.stop_reason === "max_tokens";
+    return { status: cls(0, false, trunc), hl: l.stop_reason || "—",
+      body: kv([["stop_reason", l.stop_reason, trunc ? "bad" : ""],
+                ["output tokens", `${l.usage_output_tokens ?? "?"} / ${rec.max_tokens ?? "?"}`, trunc ? "bad" : ""],
+                ["model", l.model_returned],
+                ["request_id", l.request_id],
+                ["api_exception", l.api_exception, l.api_exception ? "bad" : ""]]) +
+        `<div class="muted" style="margin-top:8px">full raw output in the raw record →</div>`,
+      lever: trunc ? "System prompt (cap change count) or raise max_tokens" : "—", raw: l };
+  }],
+  ["extract", "JSON parse", rec => {
+    const e = rec.extract || {}; const salv = e.extraction_path === "salvage";
+    return { status: cls(0, salv || e.extraction_path === "regex_object", false), hl: e.extraction_path || "—",
+      body: kv([["extraction_path", e.extraction_path, salv ? "warn" : ""],
+                ["had markdown fences", String(e.had_markdown_fences)],
+                ["salvaged change count", e.salvaged_change_count],
+                ["raw_parse_error", e.raw_parse_error, e.raw_parse_error ? "warn" : ""]]),
+      lever: salv ? "System prompt — output got truncated; salvage kept complete changes only" : "—", raw: e };
+  }],
+  ["validate", "Validation / clamping", rec => {
+    const v = rec.validate || {}; const clamped = v.clamped_values || [];
+    const coerced = v.coerced_toggle || []; const probs = v.problems || [];
+    const warn = clamped.length || coerced.length || probs.length || (v.select_fuzzy_matched || []).length;
+    return { status: cls(0, warn, false), hl: `${v.clean_change_count ?? "?"} / ${v.input_change_count ?? "?"} kept`,
+      body: kv([["clamped", clamped.map(c => `${c.param} ${c.proposed}→${c.clamped}`).join(", "), clamped.length ? "warn" : ""],
+                ["coerced toggle", coerced.map(c => `${c.param} '${c.proposed}'→${c.bool}`).join(", "), coerced.length ? "warn" : ""],
+                ["fuzzy select", (v.select_fuzzy_matched || []).map(c => `${c.param} '${c.proposed}'→${c.matched}`).join(", ")],
+                ["noop dropped", (v.noop_dropped || []).join(", ")],
+                ["problems", probs.join("; "), probs.length ? "warn" : ""]]),
+      lever: clamped.length || coerced.length ? "System prompt — tighten range / toggle vocabulary" : "—", raw: v };
+  }],
+  ["patch", "Final patch", rec => {
+    const p = rec.patch || {}; const cc = p.change_count ?? 0;
+    const offTarget = cc < 10 || cc > 25; const nnd = p.narrated_not_delivered || [];
+    return { status: cls(0, offTarget || nnd.length, false), hl: `${cc} changes`,
+      body: kv([["patch_name", p.patch_name],
+                ["change_count (target 10–25)", cc, offTarget ? "warn" : "ok"],
+                ["narrated but not delivered", nnd.join(", "), nnd.length ? "warn" : ""],
+                ["non-default params", Object.keys(p.resolved_nondefault || {}).length]]),
+      lever: nnd.length ? "System prompt — don't narrate moves that get dropped" : "—", raw: p };
+  }],
+  ["provenance", "Provenance", rec => {
+    const pr = rec.provenance || {}; const dist = pr.source_distribution || {};
+    const total = Object.values(dist).reduce((a, b) => a + b, 0);
+    const allGen = total > 0 && (dist.general || 0) === total;
+    const unmatched = pr.unmatched_citations || [];
+    return { status: cls(0, pr.mixer_all_down || unmatched.length, allGen), hl: allGen ? "ALL general" : "mixed",
+      body: stacked(dist, true) + provLegend(dist) +
+        kv([["unmatched citations", unmatched.join(", "), unmatched.length ? "bad" : ""],
+            ["mixer all down", String(pr.mixer_all_down), pr.mixer_all_down ? "bad" : ""]]),
+      lever: allGen ? "Corpus / retrieval — nothing from the corpus shaped this patch"
+        : unmatched.length ? "System prompt — tighten the citation contract" : "—", raw: pr };
+  }],
+  ["sysex", "SysEx (MIDI out)", rec => {
+    const s = rec.sysex || {}; const ok = s.outcome === "ok";
+    return { status: cls(0, false, s.outcome && !ok), hl: ok ? "ok" : (s.outcome || "—"),
+      body: kv([["outcome", s.outcome, ok ? "ok" : "bad"],
+                ["name truncated", String(s.name_truncated)]]),
+      lever: ok ? "—" : "Encoder — surface, don't hide (ISSUE-2)", raw: s };
+  }],
+];
+
+function showStageRaw(rail, title, raw) {
+  rail.innerHTML = `<p class="rail-title">${esc(title)}</p>` + rawJSON(raw);
+}
+
+function renderTrace(rec, detail, rail) {
+  detail.innerHTML = "";
+  const head = el("div");
+  if (rec.ok === false) {
+    head.innerHTML = `<div class="stage-head"><h1>Generation failed</h1></div>` +
+      `<div class="problems">${esc(rec.error || "unknown error")}</div>`;
+    head.innerHTML += kv([["query", rec.query], ["trace_id", rec.trace_id], ["ts", rec.ts], ["wall_ms", rec.wall_ms]]);
+    detail.appendChild(head);
+    return;
+  }
+  const p = rec.patch || {};
+  head.innerHTML =
+    `<div class="stage-head"><h1>${esc(p.patch_name || "Untitled")}</h1>` +
+    `<span class="qq">${esc(rec.trace_id || "")}</span></div>` +
+    `<div class="qq" style="font-style:italic;color:var(--text-faint)">“${esc(rec.query || "")}”</div>` +
+    `<div class="envelope"><span><b>${esc(rec.model || "")}</b></span>` +
+    `<span>grounding <b>${esc(rec.grounding || "")}</b></span><span>k=<b>${rec.k}</b></span>` +
+    `<span>temp <b>${rec.temperature}</b></span><span>floor <b>${rec.action_floor}</b></span>` +
+    `<span>rrf_k <b>${rec.rrf_k}</b></span><span><b>${rec.wall_ms}</b> ms</span></div>`;
+  detail.appendChild(head);
+
+  STAGES.forEach(([key, title, build]) => {
+    let info; try { info = build(rec); } catch { info = { status: "warn", hl: "render error", body: "", lever: "—", raw: rec[key] }; }
+    const card = el("div", `stage-card ${info.status}`);
+    card.innerHTML =
+      `<div class="ch"><span class="ttl">${esc(title)}</span><span class="hl ${info.status}">${esc(info.hl)}</span></div>` +
+      `<div class="stage-body">${info.body || ""}</div>` +
+      (info.lever && info.lever !== "—" ? `<div class="lever">LEVER → <b>${esc(info.lever)}</b></div>` : "");
+    card.onclick = () => {
+      $$(".stage-card", detail).forEach(c => c.classList.remove("sel"));
+      card.classList.add("sel");
+      showStageRaw(rail, title, info.raw);
+    };
+    detail.appendChild(card);
+  });
+}
+
+register({
+  id: "trace", label: "Trace",
+  mount: async (main, rail, params) => {
+    setStatus("working", "loading traces…");
+    const wrap = el("div", "dash-main");
+    const list = el("aside", "trace-list scroll");
+    const detail = el("div", "trace-detail scroll");
+    wrap.append(list, detail); main.appendChild(wrap);
+    const chips = el("div", "filter-chips");
+    const body = el("div"); body.style.cssText = "display:flex;flex-direction:column;gap:9px;";
+    list.append(chips, body);
+    let active = params.filter || "all";
+    let selected = params.id || null;
+
+    async function openTrace(id) {
+      selected = id;
+      $$(".trace-row", body).forEach(r => r.classList.toggle("sel", r.dataset.id === id));
+      detail.innerHTML = `<div class="empty-note">loading trace…</div>`;
+      try {
+        const rec = await jget("/api/trace?id=" + encodeURIComponent(id));
+        renderTrace(rec, detail, rail);
+        const qs = new URLSearchParams({ v: "trace", id }); history.replaceState(null, "", "?" + qs);
+      } catch (e) { detail.innerHTML = `<div class="problems">${esc(e.message)}</div>`; }
+    }
+
+    async function load() {
+      chips.innerHTML = "";
+      FILTERS.forEach(f => {
+        const c = el("button", "chip" + (f === active ? " on" : ""), esc(f));
+        c.onclick = () => { active = f; load(); };
+        chips.appendChild(c);
+      });
+      body.innerHTML = `<div class="muted pad">loading…</div>`;
+      const { traces } = await jget("/api/traces?limit=200" + (active !== "all" ? "&filter=" + active : ""));
+      setStatus("done", `${traces.length} trace${traces.length === 1 ? "" : "s"}`);
+      $("#dataAsOf").textContent = traces.length ? "latest " + traces[0].ts : "no traces yet";
+      body.innerHTML = "";
+      if (!traces.length) {
+        body.appendChild(el("div", "empty-note",
+          active !== "all" ? `No traces match “${esc(active)}”.`
+            : "No traces yet — generate a patch in <a href='studio.html'>Studio</a> and refresh."));
+        detail.innerHTML = `<div class="empty-note">Generate a patch to populate the trace log.</div>`;
+        return;
+      }
+      traces.forEach(t => {
+        const r = traceRow(t, () => openTrace(t.trace_id), t.trace_id === selected);
+        r.dataset.id = t.trace_id;
+        body.appendChild(r);
+      });
+      if (selected && traces.some(t => t.trace_id === selected)) openTrace(selected);
+      else detail.innerHTML = `<div class="empty-note">Select a trace to walk its pipeline, stage by stage.</div>`;
+    }
+    await load();
+  },
+});
+
+/* ====================================================================== *
+ *  BOOT                                                                  *
+ * ====================================================================== */
+function boot() {
+  const q = new URLSearchParams(location.search);
+  $("#refreshBtn").onclick = () => go(CURRENT ? CURRENT.id : DEFAULT_VIEW, CURRENT ? CURRENT.params : {});
+  go(q.get("v") || DEFAULT_VIEW, q.get("id") ? { id: q.get("id") } : {});
+}
+boot();
