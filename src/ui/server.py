@@ -83,6 +83,13 @@ class Handler(SimpleHTTPRequestHandler):
                 import eval_store
                 a, b = (q.get("a") or [""])[0], (q.get("b") or [""])[0]
                 self._send_json(eval_store.diff(a, b))
+            elif path == "/api/corpus":
+                import corpus_store
+                self._send_json(corpus_store.corpus_health())
+            elif path == "/api/golden":
+                import corpus_store
+                self._send_json({"records": corpus_store.golden_records(),
+                                 "gate": corpus_store.golden_gate()})
             else:
                 self._send_json({"error": "unknown endpoint"}, 404)
         except Exception as e:
@@ -118,6 +125,12 @@ class Handler(SimpleHTTPRequestHandler):
                     trace_log.emit(sink)
         elif self.path == "/api/decode":
             self._decode_capture(raw)
+        elif self.path == "/api/golden/promote":
+            try:
+                import corpus_store
+                self._send_json(corpus_store.promote(json.loads(raw).get("record") or {}))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
         else:
             self._send_json({"error": "unknown endpoint"}, 404)
 

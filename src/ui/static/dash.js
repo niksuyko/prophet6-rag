@@ -11,6 +11,7 @@ const el = (tag, cls, html) => {
 };
 const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const htmlNode = h => { const t = el("div"); t.innerHTML = h; return t.firstElementChild || t; };
 
 async function jget(url) {
   const r = await fetch(url);
@@ -283,13 +284,15 @@ function renderTrace(rec, detail, rail) {
   const p = rec.patch || {};
   head.innerHTML =
     `<div class="stage-head"><h1>${esc(p.patch_name || "Untitled")}</h1>` +
-    `<span class="qq">${esc(rec.trace_id || "")}</span></div>` +
-    `<div class="qq" style="font-style:italic;color:var(--text-faint)">“${esc(rec.query || "")}”</div>` +
+    `<button class="ghost promo-btn" title="Draft a golden-set entry from this trace">＋ Promote to golden</button></div>` +
+    `<div class="qq" style="font-style:italic;color:var(--text-faint)">“${esc(rec.query || "")}” · ${esc(rec.trace_id || "")}</div>` +
     `<div class="envelope"><span><b>${esc(rec.model || "")}</b></span>` +
     `<span>grounding <b>${esc(rec.grounding || "")}</b></span><span>k=<b>${rec.k}</b></span>` +
     `<span>temp <b>${rec.temperature}</b></span><span>floor <b>${rec.action_floor}</b></span>` +
     `<span>rrf_k <b>${rec.rrf_k}</b></span><span><b>${rec.wall_ms}</b> ms</span></div>`;
   detail.appendChild(head);
+  const pb = head.querySelector(".promo-btn");
+  if (pb) pb.onclick = () => openPromote(rec);
 
   STAGES.forEach(([key, title, build]) => {
     let info; try { info = build(rec); } catch { info = { status: "warn", hl: "render error", body: "", lever: "—", raw: rec[key] }; }
@@ -567,6 +570,165 @@ register({
     fillRuns();
   },
 });
+
+/* ====================================================================== *
+ *  CORPUS HEALTH (M4)                                                    *
+ * ====================================================================== */
+function heatClass(v) { return v == null ? "hm-na" : v >= 3 ? "hm-ok" : v >= 1 ? "hm-warn" : "hm-bad"; }
+function bars(obj, max) {
+  const m = max || Math.max(1, ...Object.values(obj));
+  return `<div class="barlist">` + Object.entries(obj).map(([k, v]) =>
+    `<div class="barrow"><span class="bk">${esc(k)}</span>` +
+    `<span class="bb"><span style="width:${(v / m * 100).toFixed(1)}%"></span></span>` +
+    `<span class="bn mono">${v}</span></div>`).join("") + `</div>`;
+}
+
+register({
+  id: "corpus", label: "Corpus",
+  mount: async (main, rail) => {
+    setStatus("working", "scanning corpus (lazy, first open is slow)…");
+    const c = await jget("/api/corpus");
+    setStatus("done", `${c.n_chunks} chunks · ${Object.keys(c.by_source_type).length} source types`);
+    $("#dataAsOf").textContent = c.model || "";
+    const ov = el("div", "ov"); main.appendChild(ov);
+
+    // coverage heatmap
+    const cov = c.coverage || {};
+    ov.appendChild(el("div", "section-title", "Coverage — families × characters (independent sources/cell)"));
+    if (cov.cells) {
+      const pct = cov.pct_cells_3plus;
+      ov.appendChild(htmlNode(`<div class="muted" style="margin-bottom:8px">` +
+        `<span class="n ${pct >= 0.9 ? "t-ok" : "t-bad"} mono" style="font-size:15px">${(pct * 100).toFixed(0)}%</span> of cells have ≥3 sources (target 90%). ` +
+        `Fixed-filename report — no trend until the writer timestamps (now added).</div>`));
+      let h = `<table class="hm"><tr><th></th>` + cov.characters.map(ch => `<th>${esc(ch)}</th>`).join("") + `</tr>`;
+      cov.families.forEach(f => {
+        h += `<tr><th class="hm-fam">${esc(f)}</th>`;
+        cov.characters.forEach(ch => {
+          const v = cov.cells[`${f}|${ch}`];
+          h += `<td class="${heatClass(v)}" title="${esc(f)} × ${esc(ch)}: ${v == null ? "excluded" : v}">${v == null ? "·" : v}</td>`;
+        });
+        h += `</tr>`;
+      });
+      ov.appendChild(htmlNode(h + `</table>`));
+      ov.appendChild(htmlNode(`<div class="legend"><span><i class="hm-ok"></i>≥3</span><span><i class="hm-warn"></i>1–2 (gap)</span><span><i class="hm-bad"></i>0</span><span><i class="hm-na"></i>excluded</span></div>`));
+    } else ov.appendChild(el("div", "empty-note", "No coverage_report.json — run eval/coverage_report.py --write."));
+
+    // composition + retrieval
+    ov.appendChild(el("div", "section-title", "Corpus composition (chunks by source type)"));
+    ov.appendChild(htmlNode(bars(c.by_source_type)));
+
+    ov.appendChild(el("div", "section-title", "Retrieval reach (across golden recall runs)"));
+    const r = c.retrieval;
+    const st = el("div", "stats");
+    [["distinct chunks retrieved", r.distinct_chunks_retrieved],
+     ["never retrieved", c.dead.never_retrieved],
+     ["recall runs scanned", r.n_recall_runs]].forEach(([k, v]) => {
+      const t = el("div", "stat"); t.innerHTML = `<div class="n mono">${v}</div><div class="k">${k}</div>`; st.appendChild(t);
+    });
+    ov.appendChild(st);
+    ov.appendChild(htmlNode(`<div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>${esc(c.dead.note)}</div>`));
+    ov.appendChild(el("div", "section-title", "Served by source type"));
+    ov.appendChild(htmlNode(bars(r.served_by_source_type)));
+    ov.appendChild(el("div", "section-title", "Most-retrieved chunks (over-relied head)"));
+    ov.appendChild(htmlNode(`<table class="tbl"><tr><th>chunk</th><th>type</th><th>hits</th></tr>` +
+      r.top_chunks.map(t => `<tr><td class="cid">${esc(t.chunk_id)}</td><td><span class="badge ${esc(t.source_type)}">${esc(t.source_type)}</span></td><td>${t.freq}</td></tr>`).join("") + `</table>`));
+
+    rail.innerHTML = `<p class="rail-title">Corpus → which lever</p>` +
+      `<p class="empty-note">A red/amber heatmap cell predicts all-“general synthesis” patches for that sound — it's the acquisition shopping list. A whole lane absent from “served by source type” means retrieval never reaches it. Both point at the <b>corpus</b> lever.</p>` +
+      (cov.gaps && cov.gaps.length ? `<div class="section-title">Gap cells (&lt;3 sources)</div>` +
+        cov.gaps.map(([k, v]) => `<div class="reg-row neg"><span class="cid mono">${esc(k)}</span><span class="mono">${v}</span></div>`).join("")
+        : `<div class="tip" style="margin-top:12px">All cells ≥3 sources.</div>`);
+  },
+});
+
+/* ====================================================================== *
+ *  GOLDEN SET (M4)                                                       *
+ * ====================================================================== */
+register({
+  id: "golden", label: "Golden",
+  mount: async (main, rail) => {
+    setStatus("working", "loading golden set…");
+    const g = await jget("/api/golden");
+    setStatus("done", `${g.records.length} golden entries`);
+    const ov = el("div", "ov"); main.appendChild(ov);
+    const gate = g.gate;
+
+    ov.appendChild(htmlNode(
+      `<div class="${gate.ok ? "tip" : "problems"}"><b>Reachability gate ${gate.ok ? "PASS" : "FAIL"}</b> — ` +
+      `${gate.total} entries; ${gate.unreachable.length} unreachable, ${gate.partial.length} partial, ${gate.missing_patch.length} missing patch. ` +
+      `(mirrors check_targets.py — re-run it after edits, D-015)</div>`));
+    if (gate.unreachable.length) {
+      ov.appendChild(el("div", "section-title", "Unreachable targets"));
+      ov.appendChild(htmlNode(gate.unreachable.map(u =>
+        `<div class="reg-row neg"><span class="cid mono">${esc(u.id)}</span><span class="muted">${esc(u.file)}</span><span class="mono">${esc(JSON.stringify(u.targets))}</span></div>`).join("")));
+    }
+
+    // bucket coverage
+    const byBucket = {};
+    g.records.forEach(r => { const k = "bucket " + r.bucket; byBucket[k] = (byBucket[k] || 0) + 1; });
+    ov.appendChild(el("div", "section-title", "Inventory by bucket"));
+    ov.appendChild(htmlNode(bars(byBucket)));
+
+    // table
+    ov.appendChild(el("div", "section-title", `All entries (${g.records.length})`));
+    const rows = g.records.map(r =>
+      `<tr><td class="cid">${esc(r.id)}</td><td>${r.bucket}</td><td class="gq">${esc((r.query || "").slice(0, 80))}</td>` +
+      `<td>${esc((r.expected_targets || []).map(t => t.source_type + ":" + t.match).join(", "))}</td>` +
+      `<td class="muted">${esc(r.file.replace("golden_set", "").replace(".jsonl", "") || "v1")}</td></tr>`).join("");
+    ov.appendChild(htmlNode(`<table class="tbl gold"><tr><th>id</th><th>b</th><th>query</th><th>targets</th><th>set</th></tr>${rows}</table>`));
+
+    rail.innerHTML = `<p class="rail-title">Growing the golden set</p>` +
+      `<p class="empty-note">The golden set is only as good as its coverage of real failures. Open a failing request in <b>Trace</b> and click <b>＋ Promote to golden</b> to draft an entry from the served chunks (§2.6); it's appended only after you confirm (D-015), then re-run check_targets.py.</p>`;
+  },
+});
+
+/* ---- promote-to-golden dialog (opened from a trace) ---- */
+function goldenDraft(rec) {
+  const seen = new Set(), targets = [];
+  (rec.final_chunks || []).forEach(c => {
+    const t = c.source_type === "manual" ? { source_type: "manual", match: c.section }
+      : { source_type: c.source_type, match: c.source_id };
+    const key = t.source_type + "|" + t.match;
+    if (t.match && !seen.has(key)) { seen.add(key); targets.push(t); }
+  });
+  const slug = (rec.query || "q").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 28).replace(/(^-|-$)/g, "");
+  return { id: "v2-b2-" + (slug || "promoted"), query: rec.query, bucket: 2,
+    expected_targets: targets.slice(0, 4), phrasing: "promoted from trace " + rec.trace_id, notes: "" };
+}
+function openPromote(rec) {
+  const back = el("div", "promo-backdrop");
+  const pop = el("div", "popover promo");
+  pop.innerHTML =
+    `<div class="pop-head"><b>Promote to golden_set_v2</b><button class="x" title="close">✕</button></div>` +
+    `<p class="pop-note">Verbatim query; targets pre-filled from the served chunks (§2.6). Edit, then append — it lands only on your confirm (D-015). Re-run check_targets.py after.</p>` +
+    `<textarea class="promo-ta" spellcheck="false"></textarea>` +
+    `<div class="promo-msg muted"></div>` +
+    `<div style="display:flex;gap:8px;margin-top:10px"><button class="ghost cancel" style="flex:1">Cancel</button>` +
+    `<button class="primary conf" style="flex:1">Append</button></div>`;
+  back.appendChild(pop); document.body.appendChild(back);
+  $(".promo-ta", pop).value = JSON.stringify(goldenDraft(rec), null, 2);
+  const close = () => back.remove();
+  $(".x", pop).onclick = close; $(".cancel", pop).onclick = close;
+  back.onclick = e => { if (e.target === back) close(); };
+  $(".conf", pop).onclick = async () => {
+    const msg = $(".promo-msg", pop);
+    let record;
+    try { record = JSON.parse($(".promo-ta", pop).value); }
+    catch (e) { msg.className = "promo-msg t-bad"; msg.textContent = "Invalid JSON: " + e.message; return; }
+    $(".conf", pop).disabled = true; msg.className = "promo-msg muted"; msg.textContent = "appending…";
+    try {
+      const r = await fetch("/api/golden/promote", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ record }),
+      });
+      const d = await r.json();
+      if (!r.ok || d.error) throw new Error(d.error || "HTTP " + r.status);
+      msg.className = "promo-msg t-ok";
+      msg.innerHTML = `✓ appended as <b>${esc(d.id)}</b>. ${esc(d.note || "")}`;
+      $(".conf", pop).style.display = "none"; $(".cancel", pop).textContent = "Close";
+    } catch (e) { msg.className = "promo-msg t-bad"; msg.textContent = "Failed: " + e.message; $(".conf", pop).disabled = false; }
+  };
+}
 
 /* ====================================================================== *
  *  BOOT                                                                  *
