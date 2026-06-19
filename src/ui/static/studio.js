@@ -40,7 +40,20 @@ function knobAngle(def, value) {
   return -135 + ((value - def.min) / (def.max - def.min)) * 270;
 }
 
-function reg(def, root, set) { els[def.id] = { def, root, set }; return root; }
+function reg(def, root, set) {
+  // wrap set() so the entry remembers the last value applied — lets Presets read the panel
+  const e = { def, root, value: undefined, set: (v, a) => { e.value = v; set(v, a); } };
+  els[def.id] = e;
+  return root;
+}
+const escapeHtml = s => String(s == null ? "" : s).replace(/[&<>"]/g,
+  c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function currentPanelParams() {
+  const p = {};
+  for (const id in els) if (els[id].value !== undefined) p[id] = els[id].value;
+  return p;
+}
+let lastPatchName = "";  // prefills the preset name field
 
 function makeKnob(def, opts = {}) {
   const root = document.createElement("div");
@@ -413,6 +426,7 @@ function badgeClass(source) {
 }
 
 function renderInspector(patch) {
+  lastPatchName = patch.patch_name || "";
   const changed = patch.changes.length;
   const grounded = patch.changes.filter(c => c.source && c.source !== "general synthesis").length;
   const pct = changed ? Math.round((grounded / changed) * 100) : 0;
@@ -620,6 +634,7 @@ async function captureFromP6() {
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || res.statusText);
       applyParams(data.params);
+      lastPatchName = data.name || "";
       setStatus(`Captured “${data.name || "patch"}” (${data.bytes} bytes) — decoded to panel`
         + (data.file ? ` + saved as ${data.file}` : ""), "done");
     } catch (err) { setStatus(`Capture decode failed: ${err.message || err}`, "error"); }
@@ -639,6 +654,81 @@ function setMidiHint(msg) { $("#midiHint").textContent = msg; }
 function toggleMidiPanel(force) {
   const p = $("#midiPanel");
   p.hidden = force === undefined ? !p.hidden : !force;
+}
+
+/* ============================== presets (save / load) ============================== */
+async function refreshPresets() {
+  const list = $("#presetList");
+  list.innerHTML = `<p class="pop-hint">loading…</p>`;
+  try {
+    const { presets } = await (await fetch("/api/presets")).json();
+    if (!presets.length) { list.innerHTML = `<p class="pop-hint">No presets yet — save one above.</p>`; return; }
+    list.innerHTML = presets.map(p =>
+      `<div class="preset-row" data-id="${escapeHtml(p.id)}">
+         <button class="preset-load" type="button" title="Load onto the panel">${escapeHtml(p.name)}</button>
+         <button class="preset-del" type="button" title="Delete preset" aria-label="Delete">✕</button>
+       </div>`).join("");
+    list.querySelectorAll(".preset-row").forEach(row => {
+      row.querySelector(".preset-load").onclick = () => loadPreset(row.dataset.id);
+      row.querySelector(".preset-del").onclick = () => deletePreset(row.dataset.id, row);
+    });
+  } catch (e) { list.innerHTML = `<p class="pop-hint">Could not load presets: ${escapeHtml(e.message)}</p>`; }
+}
+
+async function savePreset() {
+  const name = $("#presetName").value.trim();
+  if (!name) { $("#presetHint").textContent = "Enter a name first."; $("#presetName").focus(); return; }
+  $("#presetHint").textContent = "saving…";
+  try {
+    const res = await fetch("/api/preset/save", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, params: currentPanelParams() }),
+    });
+    const d = await res.json();
+    if (!res.ok || d.error) throw new Error(d.error || res.statusText);
+    $("#presetHint").textContent = `Saved “${d.name}”.`;
+    setStatus(`Preset “${d.name}” saved`, "done");
+    refreshPresets();
+  } catch (e) { $("#presetHint").textContent = `Save failed: ${e.message}`; }
+}
+
+async function loadPreset(id) {
+  try {
+    const res = await fetch("/api/preset?id=" + encodeURIComponent(id));
+    const d = await res.json();
+    if (!res.ok || d.error) throw new Error(d.error || res.statusText);
+    applyParams(d.params);
+    lastPatchName = d.name || "";
+    const sentTo = midi.on ? sendSysex(d.sysex) : false;
+    setStatus(`Loaded preset “${d.name}”` + (sentTo ? ` — sent to ${sentTo}` : ""), "done");
+    togglePresetPanel(false);
+  } catch (e) { setStatus(`Load failed: ${e.message}`, "error"); }
+}
+
+async function deletePreset(id, row) {
+  try {
+    const res = await fetch("/api/preset/delete", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const d = await res.json();
+    if (!res.ok || d.error) throw new Error(d.error || res.statusText);
+    row.remove();
+    if (!$("#presetList").children.length)
+      $("#presetList").innerHTML = `<p class="pop-hint">No presets yet — save one above.</p>`;
+  } catch (e) { $("#presetHint").textContent = `Delete failed: ${e.message}`; }
+}
+
+function togglePresetPanel(force) {
+  const p = $("#presetPanel");
+  const show = force === undefined ? p.hidden : force;
+  p.hidden = !show;
+  if (show) {
+    $("#presetName").value = lastPatchName || "";
+    $("#presetHint").textContent = "";
+    refreshPresets();
+    $("#presetName").focus();
+  }
 }
 
 /* ============================== boot ============================== */
@@ -690,6 +780,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       toggleMidiPanel(false);
   });
   reflectMidiUi();
+
+  // Presets
+  $("#presetBtn").addEventListener("click", () => { if (!busy) togglePresetPanel(); });
+  $("#presetClose").addEventListener("click", () => togglePresetPanel(false));
+  $("#presetSave").addEventListener("click", () => savePreset());
+  $("#presetName").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); savePreset(); } });
+  document.addEventListener("click", e => {
+    if (!$("#presetPanel").hidden && !e.target.closest("#presetPanel") && !e.target.closest("#presetBtn"))
+      togglePresetPanel(false);
+  });
 
   const q = new URLSearchParams(location.search).get("q");   // ?q= auto-runs a query
   if (q) { $("#queryInput").value = q; generate(q); }

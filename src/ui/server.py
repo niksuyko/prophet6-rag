@@ -109,6 +109,13 @@ class Handler(SimpleHTTPRequestHandler):
                 import corpus_store
                 self._send_json({"records": corpus_store.golden_records(),
                                  "gate": corpus_store.golden_gate()})
+            elif path == "/api/presets":
+                import preset_store
+                self._send_json({"presets": preset_store.list_presets()})
+            elif path == "/api/preset":
+                import preset_store
+                rec = preset_store.load((q.get("id") or [""])[0])
+                self._send_json(rec or {"error": "preset not found"}, 200 if rec else 404)
             else:
                 self._send_json({"error": "unknown endpoint"}, 404)
         except Exception as e:
@@ -150,6 +157,19 @@ class Handler(SimpleHTTPRequestHandler):
             try:
                 import corpus_store
                 self._send_json(corpus_store.promote(json.loads(raw).get("record") or {}))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
+        elif self.path == "/api/preset/save":
+            try:
+                import preset_store
+                body = json.loads(raw)
+                self._send_json(preset_store.save(body.get("name"), body.get("params")))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
+        elif self.path == "/api/preset/delete":
+            try:
+                import preset_store
+                self._send_json(preset_store.delete(json.loads(raw).get("id")))
             except Exception as e:
                 self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
         else:
