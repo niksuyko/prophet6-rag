@@ -15,17 +15,33 @@ Usage: python src/ui/generate_patch.py "fat juno-style brass"
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "src" / "retrieve"))
+sys.path.insert(0, str(ROOT / "src" / "evaluate"))
 import load_env  # noqa: E402,F401  (side effect: ANTHROPIC_API_KEY from .env)
 from search import retrieve  # noqa: E402
 
-from patch_schema import INIT_PATCH, schema_for_prompt, validate_changes  # noqa: E402
+import trace_log  # noqa: E402  (observability M0; appends data/traces/*.jsonl)
+from patch_schema import INIT_PATCH, PARAMS, schema_for_prompt, validate_changes  # noqa: E402
+
+try:  # canonical source classifier (provenance_probe); tracing is best-effort
+    from provenance_probe import classify as _classify_source  # noqa: E402
+except Exception:  # pragma: no cover — fall back so a trace import can never break generation
+    def _classify_source(source: str) -> str:
+        s = (source or "").lower()
+        for tag in ("patch", "manual", "reddit", "article", "video", "translation",
+                    "official_kb"):
+            if s.startswith(tag):
+                return tag
+        return "general"
 
 DEFAULT_MODEL = "claude-sonnet-4-6"
+MAX_TOKENS = 4096      # recorded in each trace as a tunable lever
+TEMPERATURE = 0.4      # recorded in each trace as a tunable lever
 
 SYSTEM = """You are a Sequential Prophet-6 sound designer. Given a sound description and
 context chunks retrieved from a Prophet-6 knowledge corpus (official manual + community
@@ -149,6 +165,7 @@ def generate_patch(query: str, mode: str = "patch+div", k: int = 8,
     full structured params and the model adapts real patches. grounding='pure': v1
     behavior (text chunks only) — kept for the measured A/B."""
     import anthropic
+    t0 = time.time()
     chunks = retrieve(query, k, mode=mode)
     patch_block = real_patch_block(chunks) if grounding == "adapt" else ""
     user = (f"Parameter schema (the only valid ids/ranges):\n\n{schema_for_prompt()}\n\n"
@@ -156,14 +173,15 @@ def generate_patch(query: str, mode: str = "patch+div", k: int = 8,
             + f"Context chunks:\n\n{build_context(chunks)}\n\n"
             f"Sound description: {query}")
     client = anthropic.Anthropic()
-    msg = client.messages.create(model=model, max_tokens=4096, temperature=0.4,
+    msg = client.messages.create(model=model, max_tokens=MAX_TOKENS, temperature=TEMPERATURE,
                                  system=SYSTEM,
                                  messages=[{"role": "user", "content": user}])
-    raw = _extract_json(msg.content[0].text)
+    raw_text = msg.content[0].text
+    raw = _extract_json(raw_text)
     changes, problems = validate_changes(raw.get("changes", []))
     patch_name = str(raw.get("patch_name", "Untitled"))
     resolved = {**INIT_PATCH, **{c["param"]: c["value"] for c in changes}}
-    return {
+    result = {
         "query": query,
         "patch_name": patch_name,
         "summary": str(raw.get("summary", "")),
@@ -177,6 +195,64 @@ def generate_patch(query: str, mode: str = "patch+div", k: int = 8,
         # when the MIDI toggle is on. Computed here so the browser stays a dumb pipe.
         "sysex": _sysex_for(resolved, patch_name),
     }
+    # Observability (M0): emit a per-request trace. Failure-isolated — never blocks the patch.
+    _emit_trace(query=query, mode=mode, k=k, grounding=grounding, model=model,
+                chunks=chunks, raw=raw, raw_text=raw_text, changes=changes,
+                problems=problems, resolved=resolved, patch_name=patch_name, msg=msg,
+                wall_ms=int((time.time() - t0) * 1000))
+    return result
+
+
+def _emit_trace(*, query, mode, k, grounding, model, chunks, raw, raw_text, changes,
+                problems, resolved, patch_name, msg, wall_ms) -> None:
+    """Build and append one observability trace record (M0 minimal field set).
+
+    Only fields already in scope here are captured; the deeper retrieval/validation
+    internals (pool, RRF, clamped values) arrive in M0b via out-params. Wrapped so a
+    bug in trace-building can never break a generated patch."""
+    try:
+        final_chunks = [{"chunk_id": c.get("chunk_id"), "source_type": c["source_type"],
+                         "source_id": c.get("source_id"), "section": c.get("section"),
+                         "label": chunk_label(c)} for c in chunks]
+        nondefault = {pid: v for pid, v in resolved.items() if v != INIT_PATCH.get(pid)}
+        source_dist: dict = {}
+        for c in changes:
+            b = _classify_source(c.get("source", ""))
+            source_dist[b] = source_dist.get(b, 0) + 1
+        clean_params = {c["param"] for c in changes}
+        proposed = [c.get("param") for c in raw.get("changes", []) if isinstance(c, dict)]
+        narrated_not_delivered = list(dict.fromkeys(
+            p for p in proposed if p and p in PARAMS and p not in clean_params))
+        mixer_all_down = all(resolved.get(m, 0) == 0 for m in
+                             ("mixer.osc1", "mixer.osc2", "mixer.sub_octave", "mixer.noise"))
+        usage = getattr(msg, "usage", None)
+        ts = trace_log.now_ts()
+        trace_log.emit({
+            "trace_id": trace_log.new_id(ts), "ts": ts,
+            "query": query, "mode": mode, "k": k, "grounding": grounding,
+            "model": model, "temperature": TEMPERATURE, "max_tokens": MAX_TOKENS,
+            "wall_ms": wall_ms, "ok": True,
+            "final_chunks": final_chunks,
+            "llm": {
+                "stop_reason": getattr(msg, "stop_reason", None),
+                "usage_output_tokens": getattr(usage, "output_tokens", None),
+                "request_id": getattr(msg, "id", None),
+                "model_returned": getattr(msg, "model", None),
+                "raw_output_text": trace_log.cap_raw(raw_text),
+            },
+            "patch": {
+                "patch_name": patch_name,
+                "changes": changes,
+                "resolved_nondefault": nondefault,
+                "change_count": len(changes),
+                "narrated_not_delivered": narrated_not_delivered,
+            },
+            "validate": {"problems": problems},
+            "provenance": {"source_distribution": source_dist,
+                           "mixer_all_down": mixer_all_down},
+        })
+    except Exception as e:  # fail-safe: tracing must never break generation
+        sys.stderr.write(f"[trace] build failed: {type(e).__name__}: {e}\n")
 
 
 def _sysex_for(resolved: dict, name: str) -> list | None:
