@@ -34,7 +34,7 @@ SHAPE_REPR = {"triangle": 16, "tri-saw": 64, "sawtooth": 127, "saw-pulse": 191,
 # option list per select offset — must mirror decode_sysex.LAYOUT exactly
 SELECT_OPTIONS = {
     15: GLIDE_MODES, 21: KEY_AMTS, 25: KEY_AMTS,
-    44: FX_TYPES[:6] + FX_TYPES[10:], 45: FX_TYPES,
+    44: FX_TYPES[:10], 45: FX_TYPES,  # FX A excludes reverbs (FX_TYPES[10:]); FX B = full list
     62: LFO_SHAPES, 85: UNISON_VOICES, 86: KEY_MODES,
     89: ARP_MODES, 90: ["1", "2", "3"], 92: DIVIDES,
 }

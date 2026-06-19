@@ -14,6 +14,7 @@ embedding model, so the first patch takes a few extra seconds)
 import json
 import sys
 import threading
+import time
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -21,9 +22,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import trace_log  # noqa: E402  (observability: emit traces outside the generation lock)
 from patch_schema import INIT_PATCH, SECTIONS  # noqa: E402
 
 _generate_lock = threading.Lock()  # one LLM/embed call at a time keeps memory sane
+LOCAL_HOSTS = {"127.0.0.1", "localhost"}  # reject non-local Host/Origin (DNS-rebinding guard)
 
 
 def _init_sysex():
@@ -40,6 +43,13 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(HERE / "static"), **kwargs)
 
+    def end_headers(self):
+        # Local dev tool: never let the browser serve a stale cached studio.js/css/html (or
+        # API response). Without this, an edited asset can keep running the old version until
+        # a manual hard-reload. Applied to every response (static + JSON).
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        super().end_headers()
+
     def _send_json(self, obj: dict, status: int = 200) -> None:
         body = json.dumps(obj).encode("utf-8")
         self.send_response(status)
@@ -48,17 +58,84 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _local_only(self) -> bool:
+        """Reject cross-origin / rebound-DNS requests before any read or side effect. The
+        server binds 127.0.0.1, so a legitimate request's Host is always local; a page on
+        another site can still issue a no-CORS POST, which this Host/Origin check blocks."""
+        host = (self.headers.get("Host") or "").rsplit(":", 1)[0]
+        if host not in LOCAL_HOSTS:
+            self._send_json({"error": "forbidden host"}, 403)
+            return False
+        origin = self.headers.get("Origin")
+        if origin:
+            from urllib.parse import urlsplit
+            if (urlsplit(origin).hostname or "") not in LOCAL_HOSTS:
+                self._send_json({"error": "forbidden origin"}, 403)
+                return False
+        return True
+
     def do_GET(self):
-        if self.path == "/api/schema":
+        if not self._local_only():
+            return
+        from urllib.parse import urlsplit, parse_qs
+        parts = urlsplit(self.path)
+        path, q = parts.path, parse_qs(parts.query)
+        if path == "/api/schema":
             self._send_json({"sections": SECTIONS, "init": INIT_PATCH,
                              "init_sysex": _init_sysex()})
+        elif path.startswith("/api/"):
+            self._api_get(path, q)
         else:
             super().do_GET()
 
+    def _api_get(self, path: str, q: dict) -> None:
+        """Read-only dashboard endpoints (file-backed, no pipeline state mutated)."""
+        try:
+            import trace_store
+            if path == "/api/traces":
+                limit = int((q.get("limit") or ["200"])[0])
+                self._send_json({"traces": trace_store.iter_summaries(
+                    limit=limit, filt=(q.get("filter") or [None])[0])})
+            elif path == "/api/trace":
+                rec = trace_store.get((q.get("id") or [""])[0])
+                self._send_json(rec or {"error": "trace not found"}, 200 if rec else 404)
+            elif path == "/api/overview":
+                import eval_store
+                self._send_json(eval_store.overview())
+            elif path == "/api/eval/runs":
+                import eval_store
+                self._send_json({"runs": eval_store.list_runs((q.get("kind") or [None])[0])})
+            elif path == "/api/eval/diff":
+                import eval_store
+                a, b = (q.get("a") or [""])[0], (q.get("b") or [""])[0]
+                self._send_json(eval_store.diff(a, b))
+            elif path == "/api/corpus":
+                import corpus_store
+                self._send_json(corpus_store.corpus_health())
+            elif path == "/api/golden":
+                import corpus_store
+                self._send_json({"records": corpus_store.golden_records(),
+                                 "gate": corpus_store.golden_gate()})
+            elif path == "/api/presets":
+                import preset_store
+                self._send_json({"presets": preset_store.list_presets()})
+            elif path == "/api/preset":
+                import preset_store
+                rec = preset_store.load((q.get("id") or [""])[0])
+                self._send_json(rec or {"error": "preset not found"}, 200 if rec else 404)
+            else:
+                self._send_json({"error": "unknown endpoint"}, 404)
+        except Exception as e:
+            self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+
     def do_POST(self):
+        if not self._local_only():
+            return
         length = int(self.headers.get("Content-Length", 0))
         raw = self.rfile.read(length) if length else b"{}"
         if self.path == "/api/patch":
+            sink: dict = {}
+            t0, query, result = time.time(), "", None
             try:
                 query = json.loads(raw).get("query", "").strip()
                 if not query:
@@ -66,16 +143,50 @@ class Handler(SimpleHTTPRequestHandler):
                     return
                 from generate_patch import generate_patch  # lazy heavy import
                 with _generate_lock:
-                    self._send_json(generate_patch(query))
+                    result = generate_patch(query, trace_sink=sink)
+                self._send_json(result)  # respond first; trace is emitted below, off-lock
             except Exception as e:
-                self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+                if result is None:  # generation itself failed (vs a send error after success)
+                    ts = trace_log.now_ts()
+                    sink = {"trace_id": trace_log.new_id(ts), "ts": ts, "ok": False,
+                            "error": f"{type(e).__name__}: {e}", "query": query}
+                try:
+                    self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+                except Exception:
+                    pass
+            finally:
+                if sink:  # emit AFTER responding and OUTSIDE _generate_lock
+                    sink.setdefault("wall_ms", int((time.time() - t0) * 1000))
+                    trace_log.emit(sink)
         elif self.path == "/api/decode":
             self._decode_capture(raw)
+        elif self.path == "/api/golden/promote":
+            try:
+                import corpus_store
+                self._send_json(corpus_store.promote(json.loads(raw).get("record") or {}))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
+        elif self.path == "/api/preset/save":
+            try:
+                import preset_store
+                body = json.loads(raw)
+                self._send_json(preset_store.save(body.get("name"), body.get("params")))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
+        elif self.path == "/api/preset/delete":
+            try:
+                import preset_store
+                self._send_json(preset_store.delete(json.loads(raw).get("id")))
+            except Exception as e:
+                self._send_json({"error": f"{type(e).__name__}: {e}"}, 400)
         else:
             self._send_json({"error": "unknown endpoint"}, 404)
 
     def _decode_capture(self, raw: bytes) -> None:
-        """Decode a captured P6 sysex dump (D-031); save it for INIT grounding."""
+        """Decode a captured P6 sysex dump (D-031). Writes the latest to captured_dump.json
+        (INIT grounding, back-compat) AND a timestamped, raw-byte-preserving copy per capture
+        so two dumps can be byte-diffed to resolve the FX byte-map (ISSUE-3) via
+        src/patches/diff_captures.py."""
         try:
             sx = bytes(int(b) & 0xFF for b in json.loads(raw).get("sysex", []))
             sys.path.insert(0, str(HERE.parent / "patches"))
@@ -84,11 +195,18 @@ class Handler(SimpleHTTPRequestHandler):
             if not d:
                 self._send_json({"error": "not a Prophet-6 program / edit-buffer sysex"}, 400)
                 return
+            # full 1024-byte internal layout (what LAYOUT offsets index into) — needed for diffs
             out = {"name": d["name"], "bank": d["bank"], "program": d["program"],
-                   "params": d["params"]}
-            (HERE.parents[1] / "data" / "patches" / "captured_dump.json").write_text(
-                json.dumps(out, indent=1), encoding="utf-8")
-            self._send_json({**out, "ok": True, "bytes": len(sx)})
+                   "params": d["params"], "bytes": list(d["_data"])}
+            patch_dir = HERE.parents[1] / "data" / "patches"
+            patch_dir.mkdir(parents=True, exist_ok=True)
+            fname = f"capture-{trace_log.new_id()}.json"  # ts + random suffix → no collisions
+            body = json.dumps(out, indent=1)
+            (patch_dir / "captured_dump.json").write_text(body, encoding="utf-8")  # latest
+            (patch_dir / fname).write_text(body, encoding="utf-8")                 # per-capture, diffable
+            # response stays lean — never ship the 1024-byte array to the browser
+            self._send_json({k: out[k] for k in ("name", "bank", "program", "params")}
+                            | {"ok": True, "bytes": len(sx), "file": fname})
         except Exception as e:
             self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
 

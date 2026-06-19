@@ -1,0 +1,186 @@
+/* Prophet-6 modern-surround foundation — shared chrome for the Studio and the
+   Observability dashboard. This is the "modern surround" half of studio.css factored out:
+   tokens + shell primitives only. The hardware-face skin (--face/--cream/.dial/.dispwin…)
+   stays in studio.css — it belongs to the one physical unit, never to the dashboard. */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap");
+
+:root {
+  --bg:        #08090c;
+  --surface:   #14161d;
+  --surface-2: #181b23;
+  --raised:    #1d212b;
+  --border:    #272b37;
+  --border-soft:#1f222c;
+  --text:      #eceef3;
+  --text-dim:  #969ba9;
+  --text-faint:#646a78;
+  --amber:     #ff9d44;
+  --amber-soft:#ffb86a;
+  --warm-2:    #ff6a4d;
+  --blue:      #6fa8ff;
+
+  /* provenance / metric-health hues (reused, never re-invented) */
+  --manual:  #7fd08a;   /* also: OK / good metric state */
+  --reddit:  #ff9d5c;
+  --patch:   #6fb8ff;
+  --general: #9aa3b2;
+
+  --shadow: 0 1px 0 #ffffff08 inset, 0 10px 30px -12px #000a;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; color: var(--text); font-size: 14px; -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column; overflow: hidden;
+  background:
+    radial-gradient(1100px 560px at 80% -8%, #181a24 0%, transparent 60%),
+    radial-gradient(900px 500px at 0% 0%, #15161d 0%, transparent 55%), var(--bg);
+  background-attachment: fixed;
+}
+::selection { background: #ff9d4455; }
+a { color: var(--blue); text-decoration: none; }
+a:hover { color: #a9c8ff; }
+
+/* ============================== top bar ============================== */
+.topbar {
+  position: relative; z-index: 30;
+  display: flex; align-items: center; gap: 22px; padding: 0 22px;
+  height: 62px; flex: none;
+  background: #0c0d12cc; backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border-soft);
+}
+.wordmark { display: flex; align-items: baseline; gap: 9px; user-select: none; }
+.wordmark .mark { font-size: 19px; font-weight: 700; letter-spacing: 2px; }
+.wordmark .mark i { color: var(--amber); font-style: normal; padding: 0 1px; }
+.tag {
+  font-size: 10px; font-weight: 600; letter-spacing: 4px; color: var(--text-faint);
+  border: 1px solid var(--border); border-radius: 5px; padding: 2px 7px;
+}
+.topbar .spacer { flex: 1; }
+
+button { font-family: inherit; cursor: pointer; border: 0; }
+.primary {
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 17px;
+  border-radius: 9px; font-size: 13px; font-weight: 600; letter-spacing: .2px;
+  color: #1a1206; background: linear-gradient(180deg, var(--amber-soft), var(--amber));
+  box-shadow: 0 1px 0 #ffffff55 inset, 0 6px 16px -6px #ff9d4488; transition: filter .15s, transform .05s;
+}
+.primary:hover { filter: brightness(1.06); }
+.primary:active { transform: translateY(1px); }
+.primary:disabled { filter: grayscale(.3) brightness(.8); cursor: wait; }
+.actions { display: flex; align-items: center; gap: 8px; }
+.ghost {
+  height: 34px; padding: 0 14px; border-radius: 9px; font-size: 13px; font-weight: 500;
+  color: var(--text-dim); background: var(--surface-2); border: 1px solid var(--border);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.ghost:hover { color: var(--text); border-color: #3a3f4d; }
+.ghost:disabled { opacity: .45; cursor: not-allowed; }
+.spinner { display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #ffffff22; border-top-color: var(--amber); animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================== workspace ============================== */
+/* grid-template-rows: minmax(0,1fr) pins the single row to the container height so the
+   panes below can't grow to content height — otherwise the inner overflow:auto never
+   triggers and content past the fold is clipped (body is overflow:hidden). */
+.workspace { flex: 1; min-height: 0; display: grid;
+  grid-template-columns: minmax(0, 1fr) 384px; grid-template-rows: minmax(0, 1fr); }
+.center-col { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.stage-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  padding: 11px 22px; border-bottom: 1px solid var(--border-soft); flex: none;
+}
+.status {
+  font-size: 12.5px; font-weight: 500; letter-spacing: .2px; display: inline-flex;
+  align-items: center; gap: 9px; min-height: 18px; color: var(--text-dim);
+}
+.status::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none;
+  background: var(--text-faint); transition: background .2s;
+}
+.status.idle::before    { background: #4a5160; }
+.status.working::before { background: var(--amber); animation: pulse 1.1s ease-in-out infinite; }
+.status.done::before    { background: var(--manual); box-shadow: 0 0 8px var(--manual); }
+.status.error::before   { background: var(--warm-2); box-shadow: 0 0 8px var(--warm-2); }
+.status.working { color: var(--amber-soft); }
+.status.error   { color: #ff9b86; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 #ff9d4400; } 50% { box-shadow: 0 0 0 5px #ff9d4422; } }
+
+.zoom { display: inline-flex; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; }
+.zoom button { padding: 5px 11px; font-size: 12px; font-weight: 500; color: var(--text-dim);
+  background: transparent; }
+.zoom button.on { background: var(--surface-2); color: var(--text); }
+.zoom button + button { border-left: 1px solid var(--border); }
+.zoom button:focus-visible { outline: 0; box-shadow: inset 0 0 0 2px #ff9d4455; }
+
+/* ============================== inspector rail ============================== */
+.inspector { border-left: 1px solid var(--border-soft); background: #0b0c11;
+  display: flex; flex-direction: column; min-height: 0; }
+.inspector-inner { overflow-y: auto; padding: 20px; flex: 1; }
+
+/* scrollbars */
+.scroll::-webkit-scrollbar, .inspector-inner::-webkit-scrollbar,
+.stage::-webkit-scrollbar { width: 11px; height: 11px; }
+.scroll::-webkit-scrollbar-thumb, .inspector-inner::-webkit-scrollbar-thumb,
+.stage::-webkit-scrollbar-thumb { background: #232734; border-radius: 8px;
+  border: 3px solid transparent; background-clip: padding-box; }
+
+/* ============================== shared widgets ============================== */
+.stats { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+.stat { flex: 1; min-width: 84px; background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: 10px; padding: 10px 11px; }
+.stat .n { font: 700 19px/1 "JetBrains Mono", monospace; color: var(--text); }
+.stat .n.amber { color: var(--amber); }
+.stat .n.ok   { color: var(--manual); }
+.stat .n.warn { color: var(--amber); }
+.stat .n.bad  { color: var(--warm-2); }
+.stat .k { font-size: 10px; letter-spacing: .8px; text-transform: uppercase; color: var(--text-faint);
+  margin-top: 5px; }
+
+.section-title { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-faint); margin: 18px 0 9px; display: flex; align-items: center; gap: 8px; }
+.section-title::after { content: ""; flex: 1; height: 1px; background: var(--border-soft); }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: .3px; }
+.badge.manual  { background: #16271a; color: var(--manual); }
+.badge.reddit  { background: #2e1d10; color: var(--reddit); }
+.badge.patch   { background: #102434; color: var(--patch); }
+.badge.general { background: #20242c; color: var(--general); }
+.badge.official_kb { background: #16271a; color: var(--manual); }
+.badge.article { background: #20242c; color: var(--general); }
+
+.tip { display: flex; gap: 9px; align-items: flex-start; margin: 16px 0; padding: 11px 13px;
+  background: #101a26; border: 1px solid #1d3144; border-radius: 10px;
+  color: #b9d2ec; font-size: 12.5px; line-height: 1.55; }
+.tip svg { width: 15px; height: 15px; flex: none; margin-top: 1px; fill: none; stroke: var(--blue);
+  stroke-width: 1.8; stroke-linecap: round; }
+.problems { margin: 14px 0; padding: 10px 12px; background: #261616; border: 1px solid #4a2727;
+  border-radius: 10px; color: #e9a7a7; font-size: 12px; line-height: 1.5; }
+
+.popover {
+  position: absolute; z-index: 40;
+  background: var(--raised); border: 1px solid var(--border); border-radius: 13px;
+  box-shadow: 0 20px 50px -16px #000c; padding: 14px; animation: pop .14s ease-out;
+}
+@keyframes pop { from { opacity: 0; transform: translateY(-6px); } }
+
+/* ============================== responsive ============================== */
+@media (max-width: 1180px) {
+  body { overflow: auto; }
+  /* single column + content-sized rows so the whole page flows and the body scrolls,
+     instead of pinning panes to the viewport (which is the wide-screen behavior). */
+  .workspace { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .center-col { min-height: auto; }
+  .inspector { border-left: 0; border-top: 1px solid var(--border-soft); }
+  .inspector-inner { overflow: visible; }
+}
+@media (max-width: 720px) {
+  .topbar { flex-wrap: wrap; height: auto; padding: 10px 14px; gap: 10px; }
+  .stage-bar { flex-wrap: wrap; }
+}

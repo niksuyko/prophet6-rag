@@ -76,9 +76,22 @@ schema FX lists with `decode_sysex.FX_TYPES` so order/membership can't drift; an
 `_encode_value` to clamp/skip an out-of-list select instead of crashing the whole dump.
 **Debug script:** `src/patches/_debug_fxon.py` + the inline reverb-on-A test.
 
-## ISSUE-3 — Master `fx.on` (offset 54) mapping is suspect
+## ISSUE-3 — Master `fx.on` was mapped to the wrong byte (54 → really 46)
 
-**Status:** open, inconclusive — needs a targeted hardware capture.
+**Status:** RESOLVED 2026-06-19. A hardware capture-diff (same patch with FX ON vs OFF,
+nothing else changed) flipped **exactly one byte: offset 46**. So the master Effects on/off
+switch is byte **46**, not 54. `decode_sysex.LAYOUT` corrected to `46: ("fx.on", bool)`; the
+factory bank was re-decoded under the corrected map and the encoder self-test stays 771/771.
+This is the root cause of the "FX panel won't switch ON when a patch is sent" report — we
+were writing `fx.on` to byte 54, which the synth ignores. It also explains the original
+508/765 finding below (we were reading the wrong byte). Captures + diff tool:
+`src/patches/diff_captures.py`.
+**Knock-on (now open):** the old `fxa.sync`/`fxb.sync` guesses (offsets 46/47) collapsed with
+this — 46 is `fx.on`, so both sync toggles are left **unmapped (raw-only)** until a targeted
+FX-A/B-sync on/off capture locates them (same diff method). Offset 54's real meaning is also
+unknown.
+
+**(original diagnosis, retained for reference:)**
 **Finding:** 508 of 765 factory patches that have an effect configured (type + mix) decode
 to `fx.on = False`. Possibly offset 54 is mislabeled, or factory patches genuinely ship
 effects configured-but-disabled. No FX-region byte cleanly correlates with audible-effect
@@ -100,5 +113,26 @@ legitimately part of a patch — it just isn't a standing control on the hardwar
 appears in the sidebar change list when a patch sets it), or relabel it as a derived
 readout. (Note: other program params are also held-button/menu settings on the real panel
 — e.g. unison key mode, glide mode, pbend range — so this is the first of a small class.)
+
+## ISSUE-5 — FX-type enum order was wrong (FX B showed "FL1" for plate reverb)
+
+**Status:** RESOLVED 2026-06-19. Two hardware captures anchored **flanger (FL1) = byte 45 value 8**
+and **plate reverb (PLA) = 12**; the corrected internal order was cross-checked against synthmutt's
+byte-level Ctrlr P6 `.syx` panel, which independently reproduces both anchors plus the trusted
+off=0/bbd=1/ddl=2/chorus=3. Corrected `FX_TYPES` (byte value -> effect):
+`0 off, 1 bbd-delay, 2 digital-delay, 3 chorus, 4 phaser-1, 5 phaser-2, 6 phaser-3, 7 ring-mod,
+8 flanger (FL1), 9 flanger-2 (FL2), 10 hall, 11 room, 12 plate, 13 spring`. New vocabulary fact:
+the P6 exposes **two flangers** (FL1/FL2) — adding FL2 at 9 is what places plate at 12.
+Applied across `decode_sysex.FX_TYPES` + `LAYOUT[44]` (FX-A = `FX_TYPES[:10]`, reverb-free),
+`encode_sysex.SELECT_OPTIONS`, `patch_schema` fxa/fxb options, and the panel `FX_CODES`
+(added FL1/FL2). Factory bank re-decoded; encoder self-test 771/771; verified plate->byte45=12,
+flanger->8, flanger-2->9, spring->13.
+**Original symptom (builder, 2026-06-19):** a patch with `fxb.type=plate-reverb` displayed as **FL1**
+on the synth — because encoding plate wrote byte 45 = 8 under the old *assumed* order, and the
+hardware reads value 8 as flanger.
+**Still to ratify (low risk):** only flanger=8 and plate=12 are direct hardware anchors; the
+in-between values (phaser-3=6, ring-mod=7, FL2=9, hall=10, room=11, spring=13) and the FX-A
+sub-list come from the byte-level panel source. A capture pass (set FX-B to each in turn, diff
+byte 45 via `src/patches/diff_captures.py`) would fully confirm them.
 
 ---

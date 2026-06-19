@@ -175,50 +175,126 @@ ACTION_WEIGHT = 1.0   # weight of the actionability ranking when fused with rele
 ACTION_FLOOR = 1.0    # a diversity-injected chunk must clear this (blocks chatter/off-topic)
 
 
-def _actionability(text: str) -> float:
-    """How much real sound-design SETTING content a chunk carries (D-034). Patch/manual/
-    translation chunks score high; recipe answers with settings score moderate; jokes,
-    'thank you', and bare links score ~0 or negative."""
+def _actionability_detail(text: str) -> dict:
+    """Actionability score plus its components (D-034), for observability. The score is
+    identical to what _actionability() returns; the component counts (term/imperative/
+    number/chatter hits) let the dashboard explain WHY a settings-rich chunk scored low."""
     import re
     t = text.lower()
     terms = sum(1 for w in _PARAM_TERMS if w in t)
     imps = sum(1 for w in _IMPERATIVE if w in t)
     nums = len(re.findall(r"\b\d{1,3}\b|o.?clock|%", t))
     chat = sum(1 for w in _CHATTER if w in t)
-    return terms + 1.5 * imps + 0.5 * min(nums, 6) - 2.0 * chat
+    return {"score": terms + 1.5 * imps + 0.5 * min(nums, 6) - 2.0 * chat,
+            "term_hits": terms, "imp_hits": imps, "num_hits": nums, "chat_hits": chat}
 
 
-def patch_diverse_search(query: str, k: int = 8) -> list[dict]:
+def _actionability(text: str) -> float:
+    """How much real sound-design SETTING content a chunk carries (D-034). Patch/manual/
+    translation chunks score high; recipe answers with settings score moderate; jokes,
+    'thank you', and bare links score ~0 or negative."""
+    return _actionability_detail(text)["score"]
+
+
+def patch_diverse_search(query: str, k: int = 8, trace: dict | None = None) -> list[dict]:
     """Patch-designer retrieval: re-rank the relevance pool by fusing retrieval rank with
     patch-actionability (RRF), then guarantee source diversity using only chunks that clear
     the actionability floor — so a 'thank you' or an off-topic troubleshooting page can no
     longer take a slot. Always treats the query as recipe-shaped (the designer always wants
-    a patch exemplar)."""
+    a patch exemplar). Pass a `trace` dict to capture pool/rerank/diversify internals for
+    observability (no effect on the returned ranking)."""
     pool = stratified_hybrid_search(query, k=25)
-    act = {c["chunk_id"]: _actionability(c["text"]) for c in pool}
-    fused = {c["chunk_id"]: 1.0 / (60 + r + 1) for r, c in enumerate(pool)}
+    detail = {c["chunk_id"]: _actionability_detail(c["text"]) for c in pool}
+    act = {cid: d["score"] for cid, d in detail.items()}
+    rel = {c["chunk_id"]: 1.0 / (60 + r + 1) for r, c in enumerate(pool)}
+    fused = dict(rel)
+    act_rrf: dict = {}
     for r, c in enumerate(sorted(pool, key=lambda c: -act[c["chunk_id"]])):
-        fused[c["chunk_id"]] += ACTION_WEIGHT / (60 + r + 1)
+        contrib = ACTION_WEIGHT / (60 + r + 1)
+        act_rrf[c["chunk_id"]] = contrib
+        fused[c["chunk_id"]] += contrib
     reranked = dedupe_by_source(sorted(pool, key=lambda c: -fused[c["chunk_id"]]))
-    return _diversify_actionable(reranked, k, act)
+    if trace is not None:
+        _trace_pool_rerank(trace, pool, detail, rel, act_rrf, fused)
+    return _diversify_actionable(reranked, k, act, trace=trace)
 
 
-def _diversify_actionable(results: list[dict], k: int, act: dict) -> list[dict]:
+def _trace_pool_rerank(trace: dict, pool: list[dict], detail: dict, rel: dict,
+                       act_rrf: dict, fused: dict) -> None:
+    """Populate trace['pool'] and trace['rerank'] from patch_diverse_search internals (D-034)."""
+    lane_counts: dict[str, int] = {}
+    for c in pool:
+        lane_counts[_lane(c)] = lane_counts.get(_lane(c), 0) + 1
+    sims = [c.get("similarity") for c in pool if c.get("similarity") is not None]
+    trace["pool"] = {
+        "pool_chunks": [{"chunk_id": c["chunk_id"], "source_type": c["source_type"],
+                         "source_id": c.get("source_id"), "section": c.get("section"),
+                         "rrf": round(c.get("rrf", 0.0), 5),
+                         "sim": round(c.get("similarity", 0.0), 4)} for c in pool],
+        "lanes_present_in_pool": sorted(lane_counts),
+        "per_lane_contribution_counts": lane_counts,
+        "top_similarity_range": [round(min(sims), 4), round(max(sims), 4)] if sims else None,
+    }
+    rel_rank = {c["chunk_id"]: r for r, c in enumerate(pool)}
+    fused_rank = {c["chunk_id"]: r for r, c in
+                  enumerate(sorted(pool, key=lambda c: -fused[c["chunk_id"]]))}
+    seen, overflow = set(), []
+    for c in sorted(pool, key=lambda c: -fused[c["chunk_id"]]):
+        key = (c["source_type"], c.get("source_id"))
+        (overflow.append(c["chunk_id"]) if key in seen else None)
+        seen.add(key)
+    trace["rerank"] = {
+        "actionability_by_chunk": {cid: {**{kk: round(vv, 3) if kk == "score" else vv
+                                            for kk, vv in d.items()}} for cid, d in detail.items()},
+        "rel_rrf_vs_action_rrf": {c["chunk_id"]: {"rel": round(rel[c["chunk_id"]], 5),
+                                                  "act": round(act_rrf.get(c["chunk_id"], 0.0), 5)}
+                                  for c in pool},
+        "rank_before_after": [[c["chunk_id"], rel_rank[c["chunk_id"]],
+                               fused_rank[c["chunk_id"]]] for c in pool],
+        "deduped_to_overflow": overflow,
+    }
+
+
+def _diversify_actionable(results: list[dict], k: int, act: dict,
+                          trace: dict | None = None) -> list[dict]:
     top = results[:k]
     rest = [c for c in results if c["chunk_id"] not in {t["chunk_id"] for t in top}]
-    groups = [lambda c: c["source_type"] in ("manual", "official_kb"),
-              lambda c: c["source_type"] == "reddit",
-              lambda c: c["source_type"] == "patch"]
+    groups = [("manual/official_kb", lambda c: c["source_type"] in ("manual", "official_kb")),
+              ("reddit", lambda c: c["source_type"] == "reddit"),
+              ("patch", lambda c: c["source_type"] == "patch")]
     slot = k - 1
-    for is_member in groups:
+    satisfied, swaps, patch_outcome, below_floor = [], [], "no_candidate_in_pool", []
+    for name, is_member in groups:
         if any(is_member(c) for c in top):
+            satisfied.append(name)
+            if name == "patch":
+                patch_outcome = "already_present"
             continue
-        cands = [c for c in rest if is_member(c) and act.get(c["chunk_id"], 0) >= ACTION_FLOOR]
+        members = [c for c in rest if is_member(c)]
+        cands = [c for c in members if act.get(c["chunk_id"], 0) >= ACTION_FLOOR]
+        if name == "patch":
+            below_floor = [{"chunk_id": c["chunk_id"], "action": round(act.get(c["chunk_id"], 0), 3)}
+                           for c in members if act.get(c["chunk_id"], 0) < ACTION_FLOOR]
         if cands:  # inject the MOST ACTIONABLE qualifying member, not just the first
             swap_in = max(cands, key=lambda c: act[c["chunk_id"]])
+            swaps.append({"group": name, "evicted_chunk_id": top[slot]["chunk_id"],
+                          "evicted_rank": slot, "swap_in_chunk_id": swap_in["chunk_id"],
+                          "swap_in_action": round(act[swap_in["chunk_id"]], 3), "slot": slot})
             top[slot] = swap_in
             rest = [c for c in rest if c["chunk_id"] != swap_in["chunk_id"]]
             slot -= 1
+            if name == "patch":
+                patch_outcome = "injected"
+        elif name == "patch":
+            patch_outcome = "all_below_floor" if members else "no_candidate_in_pool"
+    if trace is not None:
+        trace["diversify"] = {
+            "final_topk_chunk_ids": [c["chunk_id"] for c in top],
+            "groups_already_satisfied": satisfied,
+            "injected_swaps": swaps,
+            "patch_injection_outcome": patch_outcome,
+            "candidates_below_floor": below_floor,
+        }
     return top
 
 
@@ -306,8 +382,14 @@ MODES = {
 }
 
 
-def retrieve(query: str, k: int = 5, mode: str = "vector") -> list[dict]:
-    """Retrieval entry point; modes map to Phase 3/4 techniques (see decisions.md)."""
+def retrieve(query: str, k: int = 5, mode: str = "vector",
+             trace: dict | None = None) -> list[dict]:
+    """Retrieval entry point; modes map to Phase 3/4 techniques (see decisions.md).
+
+    Pass `trace` (only honored by the patch+div mode) to capture pool/rerank/diversify
+    internals for observability — it never changes the returned ranking."""
+    if trace is not None and mode == "patch+div":
+        return patch_diverse_search(query, k, trace=trace)
     return MODES[mode](query, k)
 
 

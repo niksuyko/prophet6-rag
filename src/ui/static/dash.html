@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Prophet-6 · Observability</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,"><!-- suppress favicon.ico 404 (no icon asset) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="dash.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wordmark">
+    <span class="mark">PROPHET<i>·</i>6</span>
+    <span class="tag">OBSERVABILITY</span>
+    <span id="ragHelp"></span>
+  </div>
+  <div class="spacer"></div>
+  <div class="actions">
+    <span id="dataAsOf" class="muted"></span>
+    <button id="refreshBtn" type="button" class="ghost">Refresh</button>
+    <a class="ghost" href="studio.html" title="Open the patch designer">Studio →</a>
+  </div>
+</header>
+
+<div class="stage-bar">
+  <span class="sb-left"><span id="status" class="status idle">starting…</span><span id="viewHelp"></span></span>
+  <nav id="nav" class="zoom" role="group" aria-label="Dashboard views"></nav>
+</div>
+
+<div class="workspace">
+  <div class="center-col">
+    <div id="main" class="scroll"></div>
+  </div>
+  <aside class="inspector">
+    <div id="rail" class="inspector-inner">
+      <p class="rail-title">Inspector</p>
+      <p class="empty-note">Pick a trace, then a pipeline stage, to see its raw record here.</p>
+    </div>
+  </aside>
+</div>
+
+<script src="dash.js"></script>
+</body>
+</html>

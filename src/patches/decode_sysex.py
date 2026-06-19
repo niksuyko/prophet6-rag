@@ -39,8 +39,12 @@ NAME_OFFSET, NAME_LEN = 107, 20
 SHAPES = ["triangle", "tri-saw", "sawtooth", "saw-pulse", "pulse"]
 SHAPE_BOUNDS = [32, 96, 159, 223]
 FX_TYPES = ["off", "bbd-delay", "digital-delay", "chorus", "phaser-1", "phaser-2",
-            "hall-reverb", "room-reverb", "plate-reverb", "spring-reverb",
-            "flanger", "ring-mod", "phaser-3"]  # >=10 added by OS 1.6.7 (order assumed)
+            "phaser-3", "ring-mod", "flanger", "flanger-2",
+            "hall-reverb", "room-reverb", "plate-reverb", "spring-reverb"]
+# Order CONFIRMED 2026-06-19 (ISSUE-5): hardware captures anchor flanger(FL1)=8 and plate=12,
+# and synthmutt's byte-level Ctrlr P6 .syx panel reproduces both + off/bbd/ddl/chorus. The P6
+# exposes TWO flangers (FL1=8, FL2=9) — FL2 at 9 is what places plate at 12. FX A excludes the
+# four reverbs (FX_TYPES[10:]); see LAYOUT[44]/SELECT_OPTIONS[44].
 GLIDE_MODES = ["fixed-rate", "fixed-rate-legato", "fixed-time", "fixed-time-legato"]
 LFO_SHAPES = ["triangle", "sawtooth", "rev-sawtooth", "square", "random"]
 KEY_MODES = ["low", "high", "last", "low-retrig", "high-retrig", "last-retrig"]
@@ -91,13 +95,18 @@ LAYOUT = {
     38: ("fenv.release", int),
     39: ("aenv.attack", int), 40: ("aenv.sustain", int), 41: ("aenv.decay", int),
     42: ("aenv.release", int), 43: ("aenv.velocity", bool),
-    44: ("fxa.type", sel(FX_TYPES[:6] + FX_TYPES[10:])),
+    44: ("fxa.type", sel(FX_TYPES[:10])),  # FX A = everything except the four reverbs
     45: ("fxb.type", sel(FX_TYPES)),
-    46: ("fxa.sync", bool), 47: ("fxb.sync", bool),
+    # 46 = master Effects on/off — CONFIRMED 2026-06-19 by a hardware FX-on vs FX-off capture
+    # diff (the only byte that flipped). The reverse-engineered D-023 guess put fx.on at 54 and
+    # fxa.sync at 46; the capture disproves that — 54 never moves, 46 is the real switch.
+    46: ("fx.on", bool),
+    # 47 / 54: fxa.sync / fxb.sync real offsets UNKNOWN. The old 46/47 sync pairing collapsed
+    # with the fx.on finding, so both are left raw-only (unmapped) until an FX-A/B sync on/off
+    # capture locates them (same diff method). 54 (old fx.on) is some other byte, not fx.on.
     48: ("fxa.mix", int), 49: ("fxb.mix", int),
     50: ("fxa.param1", int), 51: ("fxb.param1", int),
     52: ("fxa.param2", int), 53: ("fxb.param2", int),
-    54: ("fx.on", bool),
     # 55: sequencer on/off (raw-only); 56/57: per-FX sync divide values (raw-only)
     58: ("dist.amount", int), 59: ("lfo.frequency", int),
     # 60: unknown {0,11} (raw-only)

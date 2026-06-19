@@ -130,7 +130,7 @@ async function captureFromP6() {
       applyParams(data.params);
       console.log("[midi] captured patch:", data);
       setStatus(`captured "${data.name || "patch"}" (${data.bytes} bytes) — `
-        + "decoded to panel + saved to data/patches/captured_dump.json");
+        + `decoded to panel + saved to data/patches/${data.file || "captured_dump.json"}`);
     } catch (err) {
       setStatus(`capture decode failed: ${err.message || err}`);
     }
@@ -155,6 +155,7 @@ async function captureFromP6() {
 /* ---- hardware display codes (from the manual's 7-segment readouts) ---- */
 const FX_CODES = { "off": "OFF", "bbd-delay": "bbd", "digital-delay": "ddL", "chorus": "CHO",
   "phaser-1": "PH1", "phaser-2": "PH2", "phaser-3": "PH3", "ring-mod": "rin",
+  "flanger": "FL1", "flanger-2": "FL2",
   "hall-reverb": "HAL", "room-reverb": "rOO", "plate-reverb": "PLA", "spring-reverb": "SPr" };
 const GLIDE_CODES = { "fixed-rate": "FR", "fixed-rate-legato": "FrA",
   "fixed-time": "Ft", "fixed-time-legato": "FtA" };

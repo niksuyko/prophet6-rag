@@ -73,12 +73,18 @@ def main() -> None:
     for f, ch in gaps:
         print(f"  {f} x {ch}: {len(cell_sources.get((f, ch), ()))}")
     if "--write" in sys.argv:
-        out = {"pct_cells_3plus": round(pct, 3), "ok": ok, "total": len(cells),
+        from datetime import datetime
+        ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+        out = {"timestamp": ts, "pct_cells_3plus": round(pct, 3), "ok": ok, "total": len(cells),
                "cells": {f"{f}|{ch}": len(cell_sources.get((f, ch), ()))
                          for f, ch in cells}}
-        path = ROOT / "eval" / "results" / "coverage_report.json"
-        path.write_text(json.dumps(out, indent=1), encoding="utf-8")
-        print(f"saved -> {path.relative_to(ROOT)}")
+        results = ROOT / "eval" / "results"
+        body = json.dumps(out, indent=1)
+        # fixed-name file (back-compat) + a timestamped copy so the dashboard can show a trend
+        (results / "coverage_report.json").write_text(body, encoding="utf-8")
+        (results / f"{ts}_coverage_report.json").write_text(body, encoding="utf-8")
+        print(f"saved -> {(results / 'coverage_report.json').relative_to(ROOT)} "
+              f"(+ {ts}_coverage_report.json)")
 
 
 if __name__ == "__main__":
