@@ -43,6 +43,13 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(HERE / "static"), **kwargs)
 
+    def end_headers(self):
+        # Local dev tool: never let the browser serve a stale cached studio.js/css/html (or
+        # API response). Without this, an edited asset can keep running the old version until
+        # a manual hard-reload. Applied to every response (static + JSON).
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        super().end_headers()
+
     def _send_json(self, obj: dict, status: int = 200) -> None:
         body = json.dumps(obj).encode("utf-8")
         self.send_response(status)
