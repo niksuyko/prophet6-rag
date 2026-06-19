@@ -114,17 +114,25 @@ appears in the sidebar change list when a patch sets it), or relabel it as a der
 readout. (Note: other program params are also held-button/menu settings on the real panel
 — e.g. unison key mode, glide mode, pbend range — so this is the first of a small class.)
 
-## ISSUE-5 — FX-type enum order is a guess (FX B shows "FL1" for plate reverb)
+## ISSUE-5 — FX-type enum order was wrong (FX B showed "FL1" for plate reverb)
 
-**Status:** open — needs FX-type captures.
-**Symptom (builder, 2026-06-19):** a patch with `fxb.type = plate-reverb` displays as **FL1
-(Flanger 1)** on the hardware. **Cause:** encoding `plate-reverb` writes byte 45 = 8 (its
-index in the *assumed* `decode_sysex.FX_TYPES`), but the synth reads byte value 8 in that
-slot as flanger. The OS-1.6.7 additions (flanger/ring-mod/phaser-3) were assumed appended at
-indices 10-12 (`# order assumed`); the hardware clearly puts flanger at 8, so the reverb vs
-flanger ordering is wrong. **Resolve via capture:** set FX B to each effect in turn, capture,
-read byte 45 with `src/patches/diff_captures.py`, rebuild the true `FX_TYPES` order, then
-unify the schema FX lists with it. Also revisit the asymmetric FX-A (`SELECT_OPTIONS[44]`,
-reverb-free) vs FX-B (full) menus once the real per-slot effect lists are known (ISSUE-2).
+**Status:** RESOLVED 2026-06-19. Two hardware captures anchored **flanger (FL1) = byte 45 value 8**
+and **plate reverb (PLA) = 12**; the corrected internal order was cross-checked against synthmutt's
+byte-level Ctrlr P6 `.syx` panel, which independently reproduces both anchors plus the trusted
+off=0/bbd=1/ddl=2/chorus=3. Corrected `FX_TYPES` (byte value -> effect):
+`0 off, 1 bbd-delay, 2 digital-delay, 3 chorus, 4 phaser-1, 5 phaser-2, 6 phaser-3, 7 ring-mod,
+8 flanger (FL1), 9 flanger-2 (FL2), 10 hall, 11 room, 12 plate, 13 spring`. New vocabulary fact:
+the P6 exposes **two flangers** (FL1/FL2) — adding FL2 at 9 is what places plate at 12.
+Applied across `decode_sysex.FX_TYPES` + `LAYOUT[44]` (FX-A = `FX_TYPES[:10]`, reverb-free),
+`encode_sysex.SELECT_OPTIONS`, `patch_schema` fxa/fxb options, and the panel `FX_CODES`
+(added FL1/FL2). Factory bank re-decoded; encoder self-test 771/771; verified plate->byte45=12,
+flanger->8, flanger-2->9, spring->13.
+**Original symptom (builder, 2026-06-19):** a patch with `fxb.type=plate-reverb` displayed as **FL1**
+on the synth — because encoding plate wrote byte 45 = 8 under the old *assumed* order, and the
+hardware reads value 8 as flanger.
+**Still to ratify (low risk):** only flanger=8 and plate=12 are direct hardware anchors; the
+in-between values (phaser-3=6, ring-mod=7, FL2=9, hall=10, room=11, spring=13) and the FX-A
+sub-list come from the byte-level panel source. A capture pass (set FX-B to each in turn, diff
+byte 45 via `src/patches/diff_captures.py`) would fully confirm them.
 
 ---

@@ -19,6 +19,7 @@ let busy = false;
  * ====================================================================== */
 const FX_CODES = { "off": "OFF", "bbd-delay": "bbd", "digital-delay": "ddL", "chorus": "CHO",
   "phaser-1": "PH1", "phaser-2": "PH2", "phaser-3": "PH3", "ring-mod": "rin",
+  "flanger": "FL1", "flanger-2": "FL2",
   "hall-reverb": "HAL", "room-reverb": "rOO", "plate-reverb": "PLA", "spring-reverb": "SPr" };
 const GLIDE_CODES = { "fixed-rate": "FR", "fixed-rate-legato": "FrA",
   "fixed-time": "Ft", "fixed-time-legato": "FtA" };

@@ -178,10 +178,11 @@ SECTIONS = [
     ]),
     ("Effect A", [
         dict(id="fxa.type", label="Type", type="select", init="off",
-             # FX A (FX1) has NO reverbs on the hardware — must stay a subset of
-             # decode_sysex SELECT_OPTIONS[44]; a reverb here is unrepresentable (D-032)
+             # FX A (FX1) has NO reverbs on the hardware — kept in lockstep with
+             # decode_sysex FX_TYPES[:10] (the reverb-free FX-A set); a reverb here is
+             # unrepresentable (D-032). FL1/FL2 are the P6's two flangers (ISSUE-5).
              options=["off", "bbd-delay", "digital-delay", "chorus", "phaser-1", "phaser-2",
-                      "phaser-3", "ring-mod"],
+                      "phaser-3", "ring-mod", "flanger", "flanger-2"],
              hint="Effect A type. FX A has NO reverbs — put any reverb on Effect B. "
                   "bbd = warm analog-style delay; chorus = vintage thickener; "
                   "phaser-1 = deep resonant sweep."),
@@ -198,9 +199,10 @@ SECTIONS = [
     ]),
     ("Effect B", [
         dict(id="fxb.type", label="Type", type="select", init="off",
+             # Full FX set, in lockstep with decode_sysex FX_TYPES (byte-value order).
              options=["off", "bbd-delay", "digital-delay", "chorus", "phaser-1", "phaser-2",
-                      "phaser-3", "ring-mod", "hall-reverb", "room-reverb", "plate-reverb",
-                      "spring-reverb"],
+                      "phaser-3", "ring-mod", "flanger", "flanger-2", "hall-reverb",
+                      "room-reverb", "plate-reverb", "spring-reverb"],
              hint="Effect B type (commonly a reverb after a modulation effect on A)."),
         dict(id="fxb.mix", label="Mix", type="knob", min=0, max=127, init=64,
              hint="Wet/dry balance for Effect B."),
