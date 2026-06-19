@@ -14,6 +14,7 @@ embedding model, so the first patch takes a few extra seconds)
 import json
 import sys
 import threading
+import time
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -21,6 +22,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import trace_log  # noqa: E402  (observability: emit traces outside the generation lock)
 from patch_schema import INIT_PATCH, SECTIONS  # noqa: E402
 
 _generate_lock = threading.Lock()  # one LLM/embed call at a time keeps memory sane
@@ -59,6 +61,8 @@ class Handler(SimpleHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         raw = self.rfile.read(length) if length else b"{}"
         if self.path == "/api/patch":
+            sink: dict = {}
+            t0, query, result = time.time(), "", None
             try:
                 query = json.loads(raw).get("query", "").strip()
                 if not query:
@@ -66,9 +70,21 @@ class Handler(SimpleHTTPRequestHandler):
                     return
                 from generate_patch import generate_patch  # lazy heavy import
                 with _generate_lock:
-                    self._send_json(generate_patch(query))
+                    result = generate_patch(query, trace_sink=sink)
+                self._send_json(result)  # respond first; trace is emitted below, off-lock
             except Exception as e:
-                self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+                if result is None:  # generation itself failed (vs a send error after success)
+                    ts = trace_log.now_ts()
+                    sink = {"trace_id": trace_log.new_id(ts), "ts": ts, "ok": False,
+                            "error": f"{type(e).__name__}: {e}", "query": query}
+                try:
+                    self._send_json({"error": f"{type(e).__name__}: {e}"}, 500)
+                except Exception:
+                    pass
+            finally:
+                if sink:  # emit AFTER responding and OUTSIDE _generate_lock
+                    sink.setdefault("wall_ms", int((time.time() - t0) * 1000))
+                    trace_log.emit(sink)
         elif self.path == "/api/decode":
             self._decode_capture(raw)
         else:

@@ -293,9 +293,15 @@ def schema_for_prompt() -> str:
     return "\n".join(lines)
 
 
-def validate_changes(changes: list) -> tuple[list, list]:
-    """Clamp/coerce LLM-proposed changes to the schema. Returns (clean, problems)."""
+def validate_changes(changes: list, meta: dict | None = None) -> tuple[list, list]:
+    """Clamp/coerce LLM-proposed changes to the schema. Returns (clean, problems).
+
+    Pass an optional `meta` dict to capture the otherwise-silent mutations (clamped
+    values, fuzzy-matched selects, coerced toggles, dropped no-ops) for observability.
+    The (clean, problems) return is byte-identical whether or not `meta` is supplied, so
+    eval callers (e.g. eval/patch_accuracy.py) are unaffected."""
     clean, problems = [], []
+    clamped, noop, fuzzy, coerced = [], [], [], []
     for ch in changes:
         pid = ch.get("param")
         p = PARAMS.get(pid)
@@ -309,23 +315,35 @@ def validate_changes(changes: list) -> tuple[list, list]:
             except (TypeError, ValueError):
                 problems.append(f"{pid}: non-numeric value {val!r} dropped")
                 continue
+            proposed = val
             val = max(p["min"], min(p["max"], val))
+            if val != proposed:
+                clamped.append({"param": pid, "proposed": proposed, "clamped": val,
+                                "min": p["min"], "max": p["max"]})
         elif p["type"] == "toggle":
             if isinstance(val, str):
-                val = val.strip().lower() in ("true", "on", "yes", "1")
+                b = val.strip().lower() in ("true", "on", "yes", "1")
+                coerced.append({"param": pid, "proposed": val, "bool": b})
+                val = b
             val = bool(val)
         else:  # select
             sval = str(val).strip().lower()
             match = next((o for o in p["options"] if o.lower() == sval), None)
             if match is None:
                 match = next((o for o in p["options"] if sval and sval in o.lower()), None)
+                if match is not None:
+                    fuzzy.append({"param": pid, "proposed": val, "matched": match})
             if match is None:
                 problems.append(f"{pid}: option {val!r} not in {p['options']} — dropped")
                 continue
             val = match
         if val == p["init"]:
+            noop.append(pid)
             continue  # not actually a change
         clean.append({"param": pid, "value": val,
                       "why": str(ch.get("why", "")).strip(),
                       "source": str(ch.get("source", "")).strip()})
+    if meta is not None:
+        meta.update({"clamped_values": clamped, "noop_dropped": noop,
+                     "select_fuzzy_matched": fuzzy, "coerced_toggle": coerced})
     return clean, problems
