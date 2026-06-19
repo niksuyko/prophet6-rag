@@ -13,6 +13,40 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const htmlNode = h => { const t = el("div"); t.innerHTML = h; return t.firstElementChild || t; };
 
+/* ---- inline teaching help: HELP[key] = {term, what, why, tip?} (populated below) ---- */
+let HELP = {};
+function helpIcon(key) {
+  // emit the ⓘ only if we actually have copy for this key (no dead affordances)
+  return HELP[key] ? `<span class="help" data-help="${esc(key)}" tabindex="0" role="button" aria-label="Explain: ${esc(HELP[key].term)}"></span>` : "";
+}
+// a section title with an optional help icon (icon sits before the trailing hairline)
+function secTitle(text, key) { return el("div", "section-title", esc(text) + (key ? helpIcon(key) : "")); }
+
+function initHelp() {
+  const pop = el("div", "help-pop"); document.body.appendChild(pop);
+  let hideT;
+  const show = icon => {
+    const d = HELP[icon.dataset.help]; if (!d) return;
+    clearTimeout(hideT);
+    pop.innerHTML = `<span class="ht">${esc(d.term)}</span><p class="hw">${esc(d.what)}</p>` +
+      `<p class="hy">${esc(d.why)}</p>` + (d.tip ? `<p class="htip">${esc(d.tip)}</p>` : "");
+    pop.style.visibility = "hidden"; pop.classList.add("show");
+    pop.style.left = "0px"; pop.style.top = "0px";
+    const r = icon.getBoundingClientRect(), pr = pop.getBoundingClientRect();
+    let left = Math.max(12, Math.min(r.left, innerWidth - pr.width - 12));
+    let top = r.bottom + 8;
+    if (top + pr.height > innerHeight - 12) top = Math.max(12, r.top - pr.height - 8);
+    pop.style.left = left + "px"; pop.style.top = top + "px"; pop.style.visibility = "";
+  };
+  const hide = () => { hideT = setTimeout(() => pop.classList.remove("show"), 60); };
+  const closest = (e, sel) => e.target && e.target.closest && e.target.closest(sel);
+  document.addEventListener("mouseover", e => { const i = closest(e, ".help"); if (i) show(i); });
+  document.addEventListener("mouseout", e => { if (closest(e, ".help")) hide(); });
+  document.addEventListener("focusin", e => { const i = closest(e, ".help"); if (i) show(i); });
+  document.addEventListener("focusout", e => { if (closest(e, ".help")) hide(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") pop.classList.remove("show"); });
+}
+
 async function jget(url) {
   const r = await fetch(url);
   let d = {};
@@ -96,6 +130,7 @@ async function go(id, params = {}) {
   const v = VIEWS.find(x => x.id === id) || VIEWS.find(x => x.id === DEFAULT_VIEW) || VIEWS[0];
   CURRENT = { id: v.id, params };
   renderNav(v.id);
+  const vh = $("#viewHelp"); if (vh) vh.innerHTML = helpIcon("view." + v.id);
   const qs = new URLSearchParams({ v: v.id, ...(params.id ? { id: params.id } : {}) });
   history.replaceState(null, "", "?" + qs.toString());
   const main = $("#main"), rail = $("#rail");
@@ -284,12 +319,14 @@ function renderTrace(rec, detail, rail) {
   const p = rec.patch || {};
   head.innerHTML =
     `<div class="stage-head"><h1>${esc(p.patch_name || "Untitled")}</h1>` +
-    `<button class="ghost promo-btn" title="Draft a golden-set entry from this trace">＋ Promote to golden</button></div>` +
+    `<button class="ghost promo-btn" title="Draft a golden-set entry from this trace">＋ Promote to golden</button>${helpIcon("golden.promote")}</div>` +
     `<div class="qq" style="font-style:italic;color:var(--text-faint)">“${esc(rec.query || "")}” · ${esc(rec.trace_id || "")}</div>` +
-    `<div class="envelope"><span><b>${esc(rec.model || "")}</b></span>` +
-    `<span>grounding <b>${esc(rec.grounding || "")}</b></span><span>k=<b>${rec.k}</b></span>` +
-    `<span>temp <b>${rec.temperature}</b></span><span>floor <b>${rec.action_floor}</b></span>` +
-    `<span>rrf_k <b>${rec.rrf_k}</b></span><span><b>${rec.wall_ms}</b> ms</span></div>`;
+    `<div class="envelope"><span><b>${esc(rec.model || "")}</b>${helpIcon("env.model")}</span>` +
+    `<span>grounding <b>${esc(rec.grounding || "")}</b>${helpIcon("env.grounding")}</span>` +
+    `<span>k=<b>${rec.k}</b>${helpIcon("env.k")}</span>` +
+    `<span>temp <b>${rec.temperature}</b>${helpIcon("env.temperature")}</span>` +
+    `<span>floor <b>${rec.action_floor}</b>${helpIcon("env.action_floor")}</span>` +
+    `<span>rrf_k <b>${rec.rrf_k}</b>${helpIcon("env.rrf_k")}</span><span><b>${rec.wall_ms}</b> ms</span></div>`;
   detail.appendChild(head);
   const pb = head.querySelector(".promo-btn");
   if (pb) pb.onclick = () => openPromote(rec);
@@ -298,7 +335,7 @@ function renderTrace(rec, detail, rail) {
     let info; try { info = build(rec); } catch { info = { status: "warn", hl: "render error", body: "", lever: "—", raw: rec[key] }; }
     const card = el("div", `stage-card ${info.status}`);
     card.innerHTML =
-      `<div class="ch"><span class="ttl">${esc(title)}</span><span class="hl ${info.status}">${esc(info.hl)}</span></div>` +
+      `<div class="ch"><span class="ttl">${esc(title)}${helpIcon("stage." + key)}</span><span class="hl ${info.status}">${esc(info.hl)}</span></div>` +
       `<div class="stage-body">${info.body || ""}</div>` +
       (info.lever && info.lever !== "—" ? `<div class="lever">LEVER → <b>${esc(info.lever)}</b></div>` : "");
     card.onclick = () => {
@@ -314,12 +351,12 @@ function renderTrace(rec, detail, rail) {
  *  OVERVIEW (M2)                                                         *
  * ====================================================================== */
 const LIVE_TILES = [
-  ["all_general_rate", "ALL-GENERAL", "ratio"],
-  ["no_patch_served_rate", "NO PATCH SERVED", "ratio"],
-  ["salvage_rate", "SALVAGE/TRUNC", "ratio"],
-  ["clamp_rate", "SILENT CLAMP", "ratio"],
-  ["hallucinated_cite_rate", "BAD CITATIONS", "ratio"],
-  ["sysex_fail_rate", "SYSEX FAIL", "ratio"],
+  ["all_general_rate", "ALL-GENERAL", "live.all_general"],
+  ["no_patch_served_rate", "NO PATCH SERVED", "live.no_patch"],
+  ["salvage_rate", "SALVAGE/TRUNC", "live.salvage"],
+  ["clamp_rate", "SILENT CLAMP", "live.clamp"],
+  ["hallucinated_cite_rate", "BAD CITATIONS", "live.bad_citations"],
+  ["sysex_fail_rate", "SYSEX FAIL", "live.sysex_fail"],
 ];
 
 function kpiTile(k, onClick) {
@@ -327,7 +364,8 @@ function kpiTile(k, onClick) {
   const t = el("div", "stat click");
   t.innerHTML =
     `<div class="n ${health || "amber"}">${esc(fmtVal(k.value, k.fmt))}</div>` +
-    `<div class="k">${esc(k.metric)}${k.provisional ? '<span class="prov">PROV</span>' : ""}</div>` +
+    `<div class="k">${esc(k.metric)}${helpIcon("kpi." + k.kind)}` +
+    `${k.provisional ? '<span class="prov">PROV</span>' + helpIcon("kpi.provisional") : ""}</div>` +
     (k.kind === "recall" ? sparkline(k.history, k.target) : "");
   t.onclick = onClick;
   return t;
@@ -347,7 +385,7 @@ register({
     const ov = el("div", "ov"); main.appendChild(ov);
 
     // --- eval health KPIs ---
-    ov.appendChild(el("div", "section-title", "Eval health — latest per kind"));
+    ov.appendChild(secTitle("Eval health — latest per kind", "kpi.threshold"));
     const kstats = el("div", "stats"); ov.appendChild(kstats);
     if (!data.eval.length) kstats.appendChild(el("div", "empty-note", "No eval results yet."));
     data.eval.forEach(k => {
@@ -356,31 +394,30 @@ register({
     });
 
     // --- live generation health (rolling) ---
-    ov.appendChild(el("div", "section-title",
-      `Live generation health — rolling last ${data.live.n_traces || 0}`));
+    ov.appendChild(secTitle(`Live generation health — rolling last ${data.live.n_traces || 0}`, "live.intro"));
     if (!data.live.n_ok) {
       ov.appendChild(el("div", "empty-note", "No live traces yet — generate patches in <a href='studio.html'>Studio</a>."));
     } else {
       const lstats = el("div", "stats");
-      LIVE_TILES.forEach(([key, label]) => {
+      LIVE_TILES.forEach(([key, label, hk]) => {
         const v = data.live[key];
         const t = el("div", "stat");
-        t.innerHTML = `<div class="n ${rateHealth(v)}">${v == null ? "—" : (v * 100).toFixed(0) + "%"}</div><div class="k">${label}</div>`;
+        t.innerHTML = `<div class="n ${rateHealth(v)}">${v == null ? "—" : (v * 100).toFixed(0) + "%"}</div><div class="k">${label}${helpIcon(hk)}</div>`;
         lstats.appendChild(t);
       });
       const cc = data.live.mean_change_count;
       const ccH = cc == null ? "" : (cc >= 10 && cc <= 25 ? "ok" : "warn");
       const extra = el("div", "stat");
-      extra.innerHTML = `<div class="n ${ccH}">${cc ?? "—"}</div><div class="k">MEAN CHANGES (10–25)</div>`;
+      extra.innerHTML = `<div class="n ${ccH}">${cc ?? "—"}</div><div class="k">MEAN CHANGES (10–25)${helpIcon("live.mean_changes")}</div>`;
       lstats.appendChild(extra);
       const w = el("div", "stat");
-      w.innerHTML = `<div class="n">${data.live.mean_wall_ms ?? "—"}</div><div class="k">MEAN MS</div>`;
+      w.innerHTML = `<div class="n">${data.live.mean_wall_ms ?? "—"}</div><div class="k">MEAN MS${helpIcon("live.mean_ms")}</div>`;
       lstats.appendChild(w);
       ov.appendChild(lstats);
     }
 
     // --- recent traces ---
-    ov.appendChild(el("div", "section-title", "Recent traces"));
+    ov.appendChild(secTitle("Recent traces", "trace.what_is"));
     if (!recent.traces.length) {
       ov.appendChild(el("div", "empty-note", "No traces yet."));
     } else {
@@ -444,6 +481,7 @@ register({
         };
         chips.appendChild(c);
       });
+      chips.insertAdjacentHTML("beforeend", helpIcon("trace.filters"));
       body.innerHTML = `<div class="muted pad">loading…</div>`;
       const { traces } = await jget("/api/traces?limit=200" + (active !== "all" ? "&filter=" + active : ""));
       setStatus("done", `${traces.length} trace${traces.length === 1 ? "" : "s"}`);
@@ -501,25 +539,25 @@ function renderDiff(d, out, rail) {
   const good = d.delta == null ? null : (dir === "high" ? d.delta >= 0 : d.delta <= 0);
   const dcls = d.delta == null || d.delta === 0 ? "" : (good ? "delta-pos" : "delta-neg");
   out.innerHTML =
-    `<div class="diff-band"><div><div class="k">${esc(d.metric)}</div>` +
+    `<div class="diff-band"><div><div class="k">${esc(d.metric)}${helpIcon("diff.delta")}</div>` +
     `<div class="band-vals"><span class="mono">${esc(fmtVal(d.a.value, d.fmt))}</span> → ` +
     `<span class="mono">${esc(fmtVal(d.b.value, d.fmt))}</span></div></div>` +
     `<div class="band-delta ${dcls}">${esc(fmtDelta(d.delta))}</div></div>` +
-    `<div class="muted" style="margin:8px 0 4px">A: ${esc(d.a.label)} (${esc(d.a.ts)}) · B: ${esc(d.b.label)} (${esc(d.b.ts)}) · ${d.n_common} shared queries</div>` +
+    `<div class="muted" style="margin:8px 0 4px">A: ${esc(d.a.label)} (${esc(d.a.ts)}) · B: ${esc(d.b.label)} (${esc(d.b.ts)}) · ${d.n_common} shared queries${helpIcon("diff.shared_queries")}</div>` +
     (d.n_common === 0 ? `<div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>These two runs share no query ids — likely different golden sets (e.g. v1 vs v2). Headline and per-bucket deltas still apply; pick two runs of the same set for a per-query regression list.</div>` : "");
 
   if (d.tripwire) {
     const tw = d.tripwire;
-    out.innerHTML += `<div class="${tw.pass ? "tip" : "problems"}"><b>v1 tripwire ${tw.pass ? "PASS" : "FAIL"}</b> — ` +
+    out.innerHTML += `<div class="${tw.pass ? "tip" : "problems"}"><b>v1 tripwire ${tw.pass ? "PASS" : "FAIL"}</b>${helpIcon("diff.tripwire")} — ` +
       `${esc(fmtVal(tw.value, "ratio"))} vs ${tw.target}. ${esc(tw.note)}</div>`;
   }
   if (d.per_bucket.length) {
-    out.innerHTML += `<div class="section-title">Per-bucket</div><table class="tbl"><tr><th>bucket</th><th>A</th><th>B</th><th>Δ</th></tr>` +
+    out.innerHTML += `<div class="section-title">Per-bucket${helpIcon("diff.per_bucket")}</div><table class="tbl"><tr><th>bucket</th><th>A</th><th>B</th><th>Δ</th></tr>` +
       d.per_bucket.map(b => `<tr><td class="cid">${esc(b.bucket)}</td><td>${b.a ?? "—"}</td><td>${b.b ?? "—"}</td>` +
         `<td class="${deltaCls(b.delta, dir)}">${esc(fmtDelta(b.delta))}</td></tr>`).join("") + `</table>`;
   }
   const sect = (title, items, sign) => {
-    let h = `<div class="section-title">${title}</div>`;
+    let h = `<div class="section-title">${title}${helpIcon("diff.regressed_improved")}</div>`;
     if (!items.length) return h + `<div class="empty-note">none</div>`;
     return h + `<div class="reg-list">` + items.map((it, i) =>
       `<div class="reg-row ${sign}" data-i="${i}" data-sign="${sign}"><span class="cid mono">${esc(it.id)}</span>` +
@@ -600,7 +638,7 @@ register({
 
     // coverage heatmap
     const cov = c.coverage || {};
-    ov.appendChild(el("div", "section-title", "Coverage — families × characters (independent sources/cell)"));
+    ov.appendChild(secTitle("Coverage — families × characters (independent sources/cell)", "corpus.coverage"));
     if (cov.cells) {
       const pct = cov.pct_cells_3plus;
       ov.appendChild(htmlNode(`<div class="muted" style="margin-bottom:8px">` +
@@ -620,28 +658,28 @@ register({
     } else ov.appendChild(el("div", "empty-note", "No coverage_report.json — run eval/coverage_report.py --write."));
 
     // composition + retrieval
-    ov.appendChild(el("div", "section-title", "Corpus composition (chunks by source type)"));
+    ov.appendChild(secTitle("Corpus composition (chunks by source type)", "corpus.composition"));
     ov.appendChild(htmlNode(bars(c.by_source_type)));
 
-    ov.appendChild(el("div", "section-title", "Retrieval reach (across golden recall runs)"));
+    ov.appendChild(secTitle("Retrieval reach (across golden recall runs)", "corpus.retrieval_reach"));
     const r = c.retrieval;
     const st = el("div", "stats");
-    [["distinct chunks retrieved", r.distinct_chunks_retrieved],
-     ["never retrieved", c.dead.never_retrieved],
-     ["recall runs scanned", r.n_recall_runs]].forEach(([k, v]) => {
-      const t = el("div", "stat"); t.innerHTML = `<div class="n mono">${v}</div><div class="k">${k}</div>`; st.appendChild(t);
+    [["distinct chunks retrieved", r.distinct_chunks_retrieved, "corpus.retrieval_reach"],
+     ["never retrieved", c.dead.never_retrieved, "corpus.dead"],
+     ["recall runs scanned", r.n_recall_runs, null]].forEach(([k, v, hk]) => {
+      const t = el("div", "stat"); t.innerHTML = `<div class="n mono">${v}</div><div class="k">${k}${hk ? helpIcon(hk) : ""}</div>`; st.appendChild(t);
     });
     ov.appendChild(st);
     ov.appendChild(htmlNode(`<div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>${esc(c.dead.note)}</div>`));
     ov.appendChild(el("div", "section-title", "Served by source type"));
     ov.appendChild(htmlNode(bars(r.served_by_source_type)));
-    ov.appendChild(el("div", "section-title", "Most-retrieved chunks (over-relied head)"));
+    ov.appendChild(secTitle("Most-retrieved chunks (over-relied head)", "corpus.top_chunks"));
     ov.appendChild(htmlNode(`<table class="tbl"><tr><th>chunk</th><th>type</th><th>hits</th></tr>` +
       r.top_chunks.map(t => `<tr><td class="cid">${esc(t.chunk_id)}</td><td><span class="badge ${esc(t.source_type)}">${esc(t.source_type)}</span></td><td>${t.freq}</td></tr>`).join("") + `</table>`));
 
     rail.innerHTML = `<p class="rail-title">Corpus → which lever</p>` +
       `<p class="empty-note">A red/amber heatmap cell predicts all-“general synthesis” patches for that sound — it's the acquisition shopping list. A whole lane absent from “served by source type” means retrieval never reaches it. Both point at the <b>corpus</b> lever.</p>` +
-      (cov.gaps && cov.gaps.length ? `<div class="section-title">Gap cells (&lt;3 sources)</div>` +
+      (cov.gaps && cov.gaps.length ? `<div class="section-title">Gap cells (&lt;3 sources)${helpIcon("corpus.gaps")}</div>` +
         cov.gaps.map(([k, v]) => `<div class="reg-row neg"><span class="cid mono">${esc(k)}</span><span class="mono">${v}</span></div>`).join("")
         : `<div class="tip" style="margin-top:12px">All cells ≥3 sources.</div>`);
   },
@@ -660,7 +698,7 @@ register({
     const gate = g.gate;
 
     ov.appendChild(htmlNode(
-      `<div class="${gate.ok ? "tip" : "problems"}"><b>Reachability gate ${gate.ok ? "PASS" : "FAIL"}</b> — ` +
+      `<div class="${gate.ok ? "tip" : "problems"}"><b>Reachability gate ${gate.ok ? "PASS" : "FAIL"}</b>${helpIcon("golden.gate")} — ` +
       `${gate.total} entries; ${gate.unreachable.length} unreachable, ${gate.partial.length} partial, ${gate.missing_patch.length} missing patch. ` +
       `(mirrors check_targets.py — re-run it after edits, D-015)</div>`));
     if (gate.unreachable.length) {
@@ -672,11 +710,11 @@ register({
     // bucket coverage
     const byBucket = {};
     g.records.forEach(r => { const k = "bucket " + r.bucket; byBucket[k] = (byBucket[k] || 0) + 1; });
-    ov.appendChild(el("div", "section-title", "Inventory by bucket"));
+    ov.appendChild(secTitle("Inventory by bucket", "golden.buckets"));
     ov.appendChild(htmlNode(bars(byBucket)));
 
     // table
-    ov.appendChild(el("div", "section-title", `All entries (${g.records.length})`));
+    ov.appendChild(secTitle(`All entries (${g.records.length})`, "golden.targets"));
     const rows = g.records.map(r =>
       `<tr><td class="cid">${esc(r.id)}</td><td>${r.bucket}</td><td class="gq">${esc((r.query || "").slice(0, 80))}</td>` +
       `<td>${esc((r.expected_targets || []).map(t => t.source_type + ":" + t.match).join(", "))}</td>` +
@@ -740,6 +778,8 @@ function openPromote(rec) {
  *  BOOT                                                                  *
  * ====================================================================== */
 function boot() {
+  initHelp();
+  const rh = $("#ragHelp"); if (rh) rh.innerHTML = helpIcon("rag.what_is");
   const q = new URLSearchParams(location.search);
   $("#refreshBtn").onclick = () => go(CURRENT ? CURRENT.id : DEFAULT_VIEW, CURRENT ? CURRENT.params : {});
   const params = {};
