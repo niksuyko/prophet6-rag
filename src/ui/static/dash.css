@@ -139,10 +139,12 @@
 .picker-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
 .field { display: flex; flex-direction: column; gap: 5px; }
 .field-k { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-faint); }
-.sel { height: 34px; min-width: 220px; max-width: 320px; padding: 0 9px; border-radius: 9px;
+/* .rdsel (run-diff <select>), NOT .sel — `.sel` is the "selected" modifier on stage
+   cards / trace rows, and a shared height:34px there collapsed every selected element. */
+.rdsel { height: 34px; min-width: 220px; max-width: 320px; padding: 0 9px; border-radius: 9px;
   background: var(--surface); color: var(--text); border: 1px solid var(--border); font-family: inherit;
   font-size: 12.5px; }
-.sel:focus { outline: 0; border-color: #4a4030; box-shadow: 0 0 0 3px #ff9d4422; }
+.rdsel:focus { outline: 0; border-color: #4a4030; box-shadow: 0 0 0 3px #ff9d4422; }
 .diff-band { display: flex; align-items: center; justify-content: space-between; gap: 20px;
   background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px;
   padding: 16px 20px; max-width: 520px; }

@@ -550,7 +550,7 @@ register({
     const kinds = [...new Set(runs.map(r => r.kind))];
     const ov = el("div", "ov"); main.appendChild(ov);
     const pick = el("div", "picker-row"); ov.appendChild(pick);
-    const kindSel = el("select", "sel"), aSel = el("select", "sel"), bSel = el("select", "sel");
+    const kindSel = el("select", "rdsel"), aSel = el("select", "rdsel"), bSel = el("select", "rdsel");
     kinds.forEach(k => kindSel.add(new Option(k, k)));
     pick.append(labelWrap("metric", kindSel), labelWrap("baseline · A", aSel), labelWrap("candidate · B", bSel));
     const outWrap = el("div"); outWrap.style.marginTop = "18px"; ov.appendChild(outWrap);
