@@ -73,6 +73,9 @@ class Handler(SimpleHTTPRequestHandler):
             elif path == "/api/trace":
                 rec = trace_store.get((q.get("id") or [""])[0])
                 self._send_json(rec or {"error": "trace not found"}, 200 if rec else 404)
+            elif path == "/api/overview":
+                import eval_store
+                self._send_json(eval_store.overview())
             else:
                 self._send_json({"error": "unknown endpoint"}, 404)
         except Exception as e:

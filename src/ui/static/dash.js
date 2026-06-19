@@ -48,12 +48,39 @@ function rawJSON(obj) {
     .replace(/^(\s*)("[^"]+")(:)/gm, '$1<span class="k">$2</span>$3');
   return `<pre class="rawbox">${j}</pre>`;
 }
+function fmtVal(v, fmt) {
+  if (v == null) return "—";
+  if (fmt === "ratio") return Number(v).toFixed(3);
+  if (fmt === "pct100") return Number(v).toFixed(0) + "%";
+  if (fmt === "pct") return (Number(v) * 100).toFixed(0) + "%";
+  return String(v);
+}
+function kpiHealth(v, target, dir) {
+  if (v == null || target == null) return "";
+  const ok = dir === "high" ? v >= target : v <= target;
+  if (ok) return "ok";
+  return Math.abs(v - target) <= target * 0.06 + 0.001 ? "warn" : "bad";
+}
+function rateHealth(v) { return v == null ? "" : v === 0 ? "ok" : v < 0.2 ? "warn" : "bad"; }
+function sparkline(hist, target) {
+  if (!hist || hist.length < 2) return "";
+  const w = 150, h = 34, pad = 3, vals = hist.map(p => p.value);
+  const mn = Math.min(...vals, target ?? Infinity), mx = Math.max(...vals, target ?? -Infinity);
+  const X = i => pad + i * (w - 2 * pad) / (hist.length - 1);
+  const Y = v => h - pad - ((v - mn) / ((mx - mn) || 1)) * (h - 2 * pad);
+  const pts = hist.map((p, i) => `${X(i).toFixed(1)},${Y(p.value).toFixed(1)}`).join(" ");
+  const last = hist[hist.length - 1];
+  const tl = target != null ? `<line x1="0" y1="${Y(target).toFixed(1)}" x2="${w}" y2="${Y(target).toFixed(1)}" stroke="var(--border)" stroke-dasharray="3 3"/>` : "";
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${tl}` +
+    `<polyline points="${pts}" fill="none" stroke="var(--amber)" stroke-width="1.5"/>` +
+    `<circle cx="${X(hist.length - 1).toFixed(1)}" cy="${Y(last.value).toFixed(1)}" r="2.5" fill="var(--amber)"/></svg>`;
+}
 
 /* ====================================================================== *
  *  ROUTER                                                                *
  * ====================================================================== */
 const VIEWS = [];
-let DEFAULT_VIEW = "trace";
+let DEFAULT_VIEW = "overview";
 function register(v) { VIEWS.push(v); }
 function renderNav(active) {
   const n = $("#nav"); n.innerHTML = "";
@@ -278,6 +305,102 @@ function renderTrace(rec, detail, rail) {
     };
     detail.appendChild(card);
   });
+}
+
+/* ====================================================================== *
+ *  OVERVIEW (M2)                                                         *
+ * ====================================================================== */
+const LIVE_TILES = [
+  ["all_general_rate", "ALL-GENERAL", "ratio"],
+  ["no_patch_served_rate", "NO PATCH SERVED", "ratio"],
+  ["salvage_rate", "SALVAGE/TRUNC", "ratio"],
+  ["clamp_rate", "SILENT CLAMP", "ratio"],
+  ["hallucinated_cite_rate", "BAD CITATIONS", "ratio"],
+  ["sysex_fail_rate", "SYSEX FAIL", "ratio"],
+];
+
+function kpiTile(k, onClick) {
+  const health = kpiHealth(k.value, k.target, k.direction);
+  const t = el("div", "stat click");
+  t.innerHTML =
+    `<div class="n ${health || "amber"}">${esc(fmtVal(k.value, k.fmt))}</div>` +
+    `<div class="k">${esc(k.metric)}${k.provisional ? '<span class="prov">PROV</span>' : ""}</div>` +
+    (k.kind === "recall" ? sparkline(k.history, k.target) : "");
+  t.onclick = onClick;
+  return t;
+}
+
+register({
+  id: "overview", label: "Overview",
+  mount: async (main, rail, params) => {
+    setStatus("working", "loading overview…");
+    const [data, recent] = await Promise.all([
+      jget("/api/overview"), jget("/api/traces?limit=8"),
+    ]);
+    setStatus("done", `${data.live.n_traces} live trace${data.live.n_traces === 1 ? "" : "s"} · ${data.eval.length} eval kinds`);
+    $("#dataAsOf").textContent = recent.traces.length ? "latest " + recent.traces[0].ts
+      : (data.eval[0] ? "eval " + data.eval[0].ts : "no data yet");
+
+    const ov = el("div", "ov"); main.appendChild(ov);
+
+    // --- eval health KPIs ---
+    ov.appendChild(el("div", "section-title", "Eval health — latest per kind"));
+    const kstats = el("div", "stats"); ov.appendChild(kstats);
+    if (!data.eval.length) kstats.appendChild(el("div", "empty-note", "No eval results yet."));
+    data.eval.forEach(k => {
+      if (k.kind === "recall") k.history = data.recall_history;
+      kstats.appendChild(kpiTile(k, () => showKpi(rail, k)));
+    });
+
+    // --- live generation health (rolling) ---
+    ov.appendChild(el("div", "section-title",
+      `Live generation health — rolling last ${data.live.n_traces || 0}`));
+    if (!data.live.n_ok) {
+      ov.appendChild(el("div", "empty-note", "No live traces yet — generate patches in <a href='studio.html'>Studio</a>."));
+    } else {
+      const lstats = el("div", "stats");
+      LIVE_TILES.forEach(([key, label]) => {
+        const v = data.live[key];
+        const t = el("div", "stat");
+        t.innerHTML = `<div class="n ${rateHealth(v)}">${v == null ? "—" : (v * 100).toFixed(0) + "%"}</div><div class="k">${label}</div>`;
+        lstats.appendChild(t);
+      });
+      const cc = data.live.mean_change_count;
+      const ccH = cc == null ? "" : (cc >= 10 && cc <= 25 ? "ok" : "warn");
+      const extra = el("div", "stat");
+      extra.innerHTML = `<div class="n ${ccH}">${cc ?? "—"}</div><div class="k">MEAN CHANGES (10–25)</div>`;
+      lstats.appendChild(extra);
+      const w = el("div", "stat");
+      w.innerHTML = `<div class="n">${data.live.mean_wall_ms ?? "—"}</div><div class="k">MEAN MS</div>`;
+      lstats.appendChild(w);
+      ov.appendChild(lstats);
+    }
+
+    // --- recent traces ---
+    ov.appendChild(el("div", "section-title", "Recent traces"));
+    if (!recent.traces.length) {
+      ov.appendChild(el("div", "empty-note", "No traces yet."));
+    } else {
+      const list = el("div"); list.style.cssText = "display:flex;flex-direction:column;gap:8px;max-width:680px;";
+      recent.traces.forEach(t => list.appendChild(traceRow(t, () => go("trace", { id: t.trace_id }), false)));
+      ov.appendChild(list);
+    }
+
+    // rail: honesty notes
+    rail.innerHTML = `<p class="rail-title">Reading these numbers</p>` +
+      `<div class="tip"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>` +
+      `Tiles tagged <span class="prov">PROV</span> are assistant-judged or carry a known artifact — spot-check before acting. Click any KPI for its caveat.</div>` +
+      `<p class="empty-note">Colour marks threshold state only: green = at/above target, amber = near, red = below. Neutral tiles have no hard target.</p>`;
+  },
+});
+
+function showKpi(rail, k) {
+  rail.innerHTML = `<p class="rail-title">${esc(k.metric)}</p>` +
+    kv([["value", fmtVal(k.value, k.fmt)], ["target", k.target ?? "—"],
+        ["run", k.run], ["ts", k.ts], ["file", k.file],
+        ...Object.entries(k.extra || {}).map(([kk, vv]) => [kk, JSON.stringify(vv)])]) +
+    (k.provisional ? `<div class="problems" style="margin-top:12px">${esc(k.caveat || "Provisional — pending builder review.")}</div>`
+      : k.caveat ? `<div class="tip" style="margin-top:12px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>${esc(k.caveat)}</div>` : "");
 }
 
 register({

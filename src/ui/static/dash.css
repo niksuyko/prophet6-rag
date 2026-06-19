@@ -112,6 +112,15 @@
 .tbl td.floored { color: var(--warm-2); } .tbl tr.injected td { color: var(--manual); }
 .tbl .cid { color: var(--text); }
 
+/* ============================== Overview ============================== */
+.ov { padding: 18px 22px; }
+.stat.click { cursor: pointer; transition: border-color .15s, background .15s; }
+.stat.click:hover { border-color: #3a3f4d; background: var(--surface-2); }
+.spark { display: block; margin-top: 8px; }
+.prov { font-size: 8.5px; font-weight: 600; letter-spacing: .5px; color: var(--text-faint);
+  border: 1px solid var(--border); border-radius: 4px; padding: 1px 4px; margin-left: 6px;
+  vertical-align: middle; }
+
 /* raw artifact viewer (rail) */
 .rail-title { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--text-faint); margin: 0 0 10px; }
