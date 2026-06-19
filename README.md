@@ -215,20 +215,6 @@ answer. That points the v2 acquisition roadmap at tutorial-depth content, not mo
 4. **Junk chunks inflate recall** — the chunk-QA loop (troll answers at score −14, OP
    self-promo, duplicated pre/post-edit comment copies) cost ~5 recall points and was correct.
 
-## Resume bullets (measurement-first)
-
-- *Built a retrieval evaluation framework for a domain RAG system (41-query golden set across
-  4 query types, multi-target matching, corpus-integrity guards); improved recall@5 from 0.90
-  to 0.95 via structure-aware PDF chunking, hybrid BM25+vector search with reciprocal rank
-  fusion, and a source-diversity guarantee — and measurably rejected two standard techniques
-  (LLM query decomposition, cross-encoder reranking) that hurt on this corpus.*
-- *Demonstrated grounded answers beating an ungrounded LLM baseline on 56% of domain queries
-  overall and 11/11 factual queries via blind position-randomized LLM-judged comparison;
-  claim-level faithfulness 93.4% with zero source contradictions.*
-- *Diagnosed every failure by pipeline stage (acquisition / chunking / retrieval / generation /
-  judge), turning eval misses into a v2 roadmap — including discovering that deleted-and-
-  unarchived reddit content made 17% of the original eval unanswerable by construction.*
-
 Notable acquisition finding (decisions.md D-015): 7 original golden targets turned out to be
 *permanently unrecoverable* — threads deleted from reddit before their comments were archived.
 Eval repaired with reachable real-query replacements; `check_targets.py` now guards eval
