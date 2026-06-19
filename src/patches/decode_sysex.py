@@ -93,11 +93,16 @@ LAYOUT = {
     42: ("aenv.release", int), 43: ("aenv.velocity", bool),
     44: ("fxa.type", sel(FX_TYPES[:6] + FX_TYPES[10:])),
     45: ("fxb.type", sel(FX_TYPES)),
-    46: ("fxa.sync", bool), 47: ("fxb.sync", bool),
+    # 46 = master Effects on/off — CONFIRMED 2026-06-19 by a hardware FX-on vs FX-off capture
+    # diff (the only byte that flipped). The reverse-engineered D-023 guess put fx.on at 54 and
+    # fxa.sync at 46; the capture disproves that — 54 never moves, 46 is the real switch.
+    46: ("fx.on", bool),
+    # 47 / 54: fxa.sync / fxb.sync real offsets UNKNOWN. The old 46/47 sync pairing collapsed
+    # with the fx.on finding, so both are left raw-only (unmapped) until an FX-A/B sync on/off
+    # capture locates them (same diff method). 54 (old fx.on) is some other byte, not fx.on.
     48: ("fxa.mix", int), 49: ("fxb.mix", int),
     50: ("fxa.param1", int), 51: ("fxb.param1", int),
     52: ("fxa.param2", int), 53: ("fxb.param2", int),
-    54: ("fx.on", bool),
     # 55: sequencer on/off (raw-only); 56/57: per-FX sync divide values (raw-only)
     58: ("dist.amount", int), 59: ("lfo.frequency", int),
     # 60: unknown {0,11} (raw-only)
