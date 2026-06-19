@@ -787,4 +787,361 @@ function boot() {
   if (q.get("filter")) params.filter = q.get("filter");
   go(q.get("v") || DEFAULT_VIEW, params);
 }
+HELP = {
+ "rag.what_is": {
+  "term": "What RAG is",
+  "what": "RAG (Retrieval-Augmented Generation) means: before the AI writes your patch, we first look up the most relevant pages from a reference library (the Prophet-6 manual, forum threads, and real factory patches) and hand them to the AI to work from. Then the AI writes the patch using those references instead of relying only on what it happens to remember.",
+  "why": "The AI's own memory is fuzzy and can confidently make things up. Feeding it real Prophet-6 facts ('grounding') is what keeps patches accurate to the actual synth rather than generic guesswork. If patches feel wrong, the cause is usually upstream: either we found the wrong reference text, or the AI ignored the good text we gave it.",
+  "tip": "Good: the patch cites a real manual section or factory patch. Bad: most settings cite 'general synthesis', meaning the AI fell back on generic memory."
+ },
+ "view.overview": {
+  "term": "Overview screen",
+  "what": "A single health dashboard for the whole system. It shows scorecards from offline test runs (graded against known-correct answers) plus live rates from the real patches people are generating right now.",
+  "why": "It is your at-a-glance 'is everything OK?' page. If a number drops here, you switch to the other views to find out which request or which part of the pipeline is responsible.",
+  "tip": "Start here. Treat it as the smoke alarm, not the diagnosis."
+ },
+ "view.trace": {
+  "term": "Trace Explorer",
+  "what": "Replays ONE single request step by step, from the original text query all the way to the final patch. You can open each stage in order: what we searched for, which reference chunks came back, what we handed the AI, and what JSON patch it wrote.",
+  "why": "This is how you find exactly where a bad patch went wrong. A weak patch usually fails at one specific stage, for example the search returned irrelevant text, or the AI was given good text but ignored it.",
+  "tip": "When a user reports 'this patch sounds nothing like what I asked', open its trace and walk the stages until the quality drops."
+ },
+ "view.diff": {
+  "term": "Run-Diff",
+  "what": "Compares two offline test runs side by side, a before and an after. You typically run the test set, change something (the search settings, the prompt, the corpus), run it again, and diff the two.",
+  "why": "It answers 'did my change actually help, or did it quietly break something else?' Without this you are guessing whether a tweak improved patch quality or just moved problems around.",
+  "tip": "Always re-run the full test set after a change and diff it, even for a 'small' tweak."
+ },
+ "view.corpus": {
+  "term": "Corpus Health",
+  "what": "Shows the health of the reference library the system searches: the manual pages, forum threads, and factory patches. It surfaces coverage and gaps in that library.",
+  "why": "The AI can only ground its answer in text that actually exists in the library. If a topic is missing or thinly covered here, requests about it will produce weak, guessed patches no matter how good the rest of the pipeline is.",
+  "tip": "If a certain kind of sound consistently produces bad patches, check whether the library even has good reference material on it."
+ },
+ "view.golden": {
+  "term": "Golden set",
+  "what": "A fixed list of test questions, each paired with a known correct answer. Running it scores the system objectively, the same questions every time, so results are comparable run to run.",
+  "why": "It is your objective yardstick: it tells you whether overall patch quality is going up or down, instead of relying on the gut feel of a few spot-checks. It is the input the test runs and Run-Diff are scored against.",
+  "tip": "Keep it fixed. If you change the questions, old and new scores are no longer comparable."
+ },
+ "kpi.recall": {
+  "term": "recall@5",
+  "what": "Out of the test questions, how often the one known-correct source chunk appears in the top 5 results the search returns. Like asking 'did the right page end up in our first handful of hits?'",
+  "why": "This is the foundation: if search can't even surface the right facts, the LLM has nothing good to work from and the patch suffers. A drop here means fix retrieval before anything downstream.",
+  "tip": "0-1, higher is better. Low recall = the answer was in the corpus but search didn't find it."
+ },
+ "kpi.coverage": {
+  "term": "category coverage (≥3 sources)",
+  "what": "Of all the sound types the product cares about (sound family like bass/lead/pad combined with a character like warm/aggressive), the share that have at least 3 independent sources backing them in the corpus.",
+  "why": "Categories with thin backing tend to produce weak, guesswork patches. A low number tells you which sound types need more reference material added to the corpus.",
+  "tip": "Higher is better. Find the under-3-source categories and feed in more docs/patches for them."
+ },
+ "kpi.provenance": {
+  "term": "provenance cited ratio",
+  "what": "Every setting in a generated patch carries a 'source.' This is the share of settings that point to a real corpus source, versus settings tagged 'general synthesis' (the model's own generic guess). Think of it as 'how much of this patch can we trace back to actual Prophet-6 facts.'",
+  "why": "This is the headline trust signal: higher means the patch is grounded in real documented behavior, lower means more of it is the model improvising. If it's low, the patch may sound plausible but isn't backed by anything.",
+  "tip": "Higher is better. Good: most settings cite a manual/forum/factory-patch source. Bad: lots of 'general synthesis.'"
+ },
+ "kpi.patch_accuracy": {
+  "term": "patch accuracy vs reference",
+  "what": "For test cases that have a real factory patch to compare against, this measures how closely the generated patch matches it setting-by-setting (knob for knob).",
+  "why": "It's the most direct 'did we get the actual sound right' check. Only the subset of cases with a known reference patch can be scored, so it's a strong but partial signal.",
+  "tip": "Higher is better. Measured only where a ground-truth reference patch exists."
+ },
+ "kpi.faithfulness": {
+  "term": "faithfulness (Q&A)",
+  "what": "On the question-answering side, the share of answers where every claim is actually backed by the retrieved text rather than made up. An AI grader does the judging.",
+  "why": "Tells you whether answers are sticking to the sources or inventing things. Because an AI judges it, treat it as a guide and spot-check, not gospel.",
+  "tip": "Higher is better. Carries a PROV badge — verify a few by hand before trusting a swing."
+ },
+ "kpi.bakeoff": {
+  "term": "bake-off win rate",
+  "what": "A head-to-head comparison: the RAG system (with retrieval) versus a plain baseline with no retrieval, scored by an AI judge. The number is how often retrieval's answer wins.",
+  "why": "Answers the bottom-line question: is all this retrieval machinery actually helping? Above 50% means retrieval beats going without it; near 50% means it's barely earning its keep.",
+  "tip": "Higher is better. AI-judged (PROV) — spot-check the verdicts before drawing conclusions."
+ },
+ "kpi.provisional": {
+  "term": "PROV (provisional) badge",
+  "what": "A flag meaning this number was judged by an AI grader or has a known measurement caveat. It's a useful estimate, not a hard measurement.",
+  "why": "It's a 'trust but verify' marker: spot-check a few underlying cases before you act on the number or read a change as real.",
+  "tip": "See a PROV badge? Open the drill-down and eyeball a couple of examples first."
+ },
+ "kpi.threshold": {
+  "term": "tile color (threshold state)",
+  "what": "A tile's color reflects only how it compares to its target, not anything else: green = at or above target, amber = near it, red = below. Tiles with no hard target stay neutral.",
+  "why": "Lets you scan for trouble at a glance — red means a metric is under its goal and likely needs attention. Neutral just means there's no fixed bar to grade against, not that it's bad.",
+  "tip": "Color = target state only. Neutral = no hard target set, so judge it on its own."
+ },
+ "trace.what_is": {
+  "term": "Trace",
+  "what": "A trace is the full recorded play-by-play of one patch generation: every stage's inputs and outputs, from the search results to the final knob settings.",
+  "why": "It lets you replay any single request and see exactly where things went right or wrong, so you can diagnose a bad patch instead of guessing.",
+  "tip": "Bad patch? Open its trace and read the stages top to bottom to find the first one that misbehaved."
+ },
+ "trace.filters": {
+  "term": "Filter chips",
+  "what": "Buttons that show only the traces with a specific problem: no-patch (nothing was produced), all-general (no real sources used), clamped (values had to be corrected to legal range), salvage (output was truncated and rescued), hallucinated-cite (cited a source that does not exist), sysex-fail (could not build the synth file), and error.",
+  "why": "Instead of scrolling everything, you jump straight to the failures of one kind, which makes patterns and root causes obvious.",
+  "tip": "Pick the symptom you care about most today and fix those traces first."
+ },
+ "trace.lever": {
+  "term": "Lever",
+  "what": "Each stage card ends with a LEVER: the one concrete thing to change if that stage caused the problem, such as the corpus, a retrieval setting, the system prompt, or the golden set.",
+  "why": "It turns a diagnosis into an action by telling you which dial actually controls that stage, so you do not waste time tuning the wrong thing.",
+  "tip": "Fix the lever on the earliest broken stage first; later stages often heal once the input is good."
+ },
+ "env.grounding": {
+  "term": "Grounding mode (adapt vs pure)",
+  "what": "How the model was fed reference material: adapt means it got full real factory-patch examples to copy and tweak; pure means it got only text chunks (manual and forum snippets), no example patches.",
+  "why": "Adapt usually grounds better because the model can start from a real working patch instead of inventing settings from descriptions.",
+  "tip": "If pure-mode traces look guessy, try adapt so the model has a real patch to lean on."
+ },
+ "env.k": {
+  "term": "k (reference chunks)",
+  "what": "How many reference snippets were placed into the prompt for the model to read. Here it is 8.",
+  "why": "Too few and the model lacks facts and falls back on guesswork; too many can bury the most relevant snippet in noise.",
+  "tip": "If patches miss obvious facts, more chunks may help; if they drift off-topic, fewer may help."
+ },
+ "env.temperature": {
+  "term": "Temperature",
+  "what": "The model's creativity/randomness dial: 0 means deterministic (same answer every time), higher means more varied. Patch design uses a little so sounds are not cookie-cutter.",
+  "why": "Higher values give more variety but also more drift and less repeatability; lower values are steadier but can feel formulaic.",
+  "tip": "Chasing a flaky, inconsistent bug? Lower it toward 0 to make runs repeatable."
+ },
+ "env.action_floor": {
+  "term": "Action floor",
+  "what": "The minimum actionability (how much real sound-design substance a chunk has) a snippet must clear to be force-included in the prompt.",
+  "why": "Raise it to block fluffy, low-content chunks from crowding the prompt; lower it if genuinely useful chunks are being left out.",
+  "tip": "Prompt full of vague filler? Raise it. Good snippets missing? Lower it."
+ },
+ "env.rrf_k": {
+  "term": "rrf_k (fusion constant)",
+  "what": "A constant in the formula that merges the keyword-search ranking and the meaning-based ranking into one combined list. It is a tuning knob for how strongly the very top ranks are favored.",
+  "why": "It shapes which results win when the two search methods disagree, so it quietly influences what the model gets to read.",
+  "tip": "Adjust only if you have a specific reason; small changes here ripple through every retrieval."
+ },
+ "env.model": {
+  "term": "Model",
+  "what": "Which Claude model generated this patch.",
+  "why": "Different models can produce different patch quality, so knowing which one ran helps you compare results and reproduce a trace.",
+  "tip": "Comparing patch quality across traces? Check they used the same model before blaming other settings."
+ },
+ "diff.delta": {
+  "term": "Delta (change A→B)",
+  "what": "How much a score moved from run A (your old baseline) to run B (your new candidate change). Green means it moved the right direction, red means it got worse.",
+  "why": "This is the one-line verdict on whether your change helped or hurt. A red delta is your cue to drill in and find out what broke before you ship it.",
+  "tip": "Green = keep the change. Red = stop and investigate the per-question list."
+ },
+ "diff.tripwire": {
+  "term": "Recall tripwire (≥0.95)",
+  "what": "A guard rail: the share of test questions where the correct source still gets found must stay at or above 0.95. A FAIL warns that your change made search worse at finding the right material.",
+  "why": "If search stops surfacing the right facts, the patch is built on guesswork. Treat a FAIL seriously, but note the caveat: a single 'miss' can be stale test data, not a true regression.",
+  "tip": "On a FAIL, open the per-question drill first; don't assume the worst until you've looked."
+ },
+ "diff.per_bucket": {
+  "term": "Per-bucket breakdown",
+  "what": "The same score split by question category ('bucket'), e.g. bass sounds vs pad sounds. Shows which kinds of requests got better or worse, not just the overall average.",
+  "why": "An overall number can hide trouble: one category improving while another tanks can net out flat. The breakdown tells you exactly which sound types to worry about.",
+  "tip": "Watch for one bucket dropping while the headline looks fine."
+ },
+ "diff.regressed_improved": {
+  "term": "Regressed / improved questions",
+  "what": "The individual test questions that flipped between the two runs, e.g. a question that used to find the right source ('hit') now misses ('regressed'), or the reverse ('improved').",
+  "why": "This is where you see the real cause. Click a regressed question to see which chunks pushed the correct answer out of the results, so you can tell if your change is to blame.",
+  "tip": "Regressions are the actionable list, read those before celebrating improvements."
+ },
+ "diff.shared_queries": {
+  "term": "Shared questions",
+  "what": "How many test questions both runs actually have in common. The comparison is only apples-to-apples on these shared questions.",
+  "why": "If this is 0, the two runs used different test sets, so only the headline and per-bucket averages are comparable, not the per-question diffs. A low number means treat the comparison with caution.",
+  "tip": "0 shared = different test sets; don't trust the per-question flips."
+ },
+ "corpus.coverage": {
+  "term": "Coverage heatmap",
+  "what": "A grid of sound families (bass, pad, lead...) against characters (warm, bright...) showing how many independent sources back each combination. Red/amber cells are thin spots with few sources.",
+  "why": "Cells with few sources predict weak patches for those sounds, the model has little real material to lean on. Treat the red/amber cells as your shopping list of content to go acquire.",
+  "tip": "Red cell = expect poor patches there until you add sources."
+ },
+ "corpus.composition": {
+  "term": "Corpus composition",
+  "what": "How many text chunks the library holds from each kind of source, e.g. official manual vs Reddit threads vs real patch files.",
+  "why": "Tells you what the knowledge base is actually made of. A library that's almost all forum chatter and little manual, or vice versa, hints at where answers may be unbalanced or shaky.",
+  "tip": "Balance matters, all one source type is a blind spot."
+ },
+ "corpus.retrieval_reach": {
+  "term": "Retrieval reach",
+  "what": "How many distinct chunks ever actually showed up in search results across all the test questions. A sense of how much of the library the search can realistically reach.",
+  "why": "If only a tiny fraction of a big library is ever reached, most of your content isn't doing any work. Low reach suggests search or content tagging may be leaving good material buried.",
+  "tip": "Measured only over the test questions, so it's a sample, not the full picture."
+ },
+ "corpus.dead": {
+  "term": "Never-retrieved chunks",
+  "what": "Chunks that never appeared in any test-question's results. With a small test set this number is expected to be high, so it's not a per-chunk dead list.",
+  "why": "Don't read individual entries here. Read it per source type: if a whole lane (e.g. all patch files) never surfaces, that's a real signal that an entire category isn't being reached.",
+  "tip": "A whole source type at zero is the alarm, not the raw total."
+ },
+ "corpus.top_chunks": {
+  "term": "Most-retrieved chunks",
+  "what": "The chunks that show up most often in search results, the 'head' of content the system leans on heavily.",
+  "why": "If a handful of chunks carry most answers, the system is over-relying on a narrow slice. That's fragile, if those chunks are wrong or thin, many patches inherit the same weakness.",
+  "tip": "A very lopsided head suggests you need more variety in retrieval."
+ },
+ "corpus.gaps": {
+  "term": "Coverage gaps (<3 sources)",
+  "what": "Sound categories backed by fewer than three independent sources, the concrete weak spots pulled out of the heatmap.",
+  "why": "Fewer than three sources means the model has little to ground a patch in for that sound, so quality there is likely poor. This is a ready-made list of content to go acquire.",
+  "tip": "Each gap is a direct to-do, find sources for that sound type."
+ },
+ "golden.gate": {
+  "term": "Golden integrity gate",
+  "what": "A pass/fail check that, for every test question, its known-correct answer still actually exists in the corpus. A FAIL means a question's expected source went missing.",
+  "why": "If the right answer isn't even in the library, the question can never be scored fairly, it will always look like a failure. A red gate means fix the test set or corpus before trusting any scores.",
+  "tip": "Always green before you read recall numbers, otherwise the scores are unfair."
+ },
+ "golden.buckets": {
+  "term": "Golden buckets",
+  "what": "The test questions grouped by what they're checking, e.g. 'did search find the right source' versus 'is the final patch accurate'.",
+  "why": "Different buckets test different stages of the pipeline. Knowing the bucket tells you whether a failure is a search problem or a patch-writing problem, which points to a different fix.",
+  "tip": "A failure's bucket tells you which part of the pipeline to look at."
+ },
+ "golden.targets": {
+  "term": "Expected targets",
+  "what": "For each test question, the specific source(s) that must be retrieved for the answer to count as correct, the official 'right answers' for that question.",
+  "why": "These define what counts as a hit. If a question's targets are wrong or outdated, it will score as a miss for no real reason, so check the targets when a question fails unexpectedly.",
+  "tip": "A surprising miss is sometimes a stale target, not a real regression."
+ },
+ "golden.promote": {
+  "term": "Promote to golden",
+  "what": "Turn a real failing request into a new permanent test case with one click, so future runs are measured against it.",
+  "why": "Real-world failures become tracked tests instead of being forgotten. Over time this grows your test set to cover the things users actually got wrong, so the same mistake can't silently come back.",
+  "tip": "When a real request fails badly, promote it so it's guarded forever."
+ },
+ "live.intro": {
+  "term": "Live vs eval",
+  "what": "These tiles are rolling rates over the most recent REAL patch generations people actually ran - not the offline test set above. They reflect what is happening in production right now.",
+  "why": "The offline scores show how the system does on a fixed exam; these show how it does on real, messy, in-the-wild requests. A problem that is rare on the exam can be common in the wild.",
+  "tip": "For most of these, lower is better (they count problems); 'mean changes' has a healthy middle band."
+ },
+ "live.all_general": {
+  "term": "All-general rate",
+  "what": "The share of recent patches where EVERY setting was tagged 'general synthesis' - not one setting could be traced to the corpus. The AI built the whole patch from generic memory.",
+  "why": "This is the clearest 'the corpus isn't helping' alarm. When it is high, requests are getting no useful reference material, so patches are educated guesses rather than grounded in real Prophet-6 facts.",
+  "tip": "High -> check whether retrieval is finding anything, and whether the corpus covers those sounds."
+ },
+ "live.no_patch": {
+  "term": "No-patch-served rate",
+  "what": "The share of recent generations where no real factory-patch example reached the AI, so it had nothing known-good to adapt from and built the patch from text alone.",
+  "why": "Adapting a real patch is a big accuracy lever; without one the AI guesses more. A high rate points to missing patch examples in the corpus for the sounds being requested.",
+  "tip": "High -> add real/factory patches to the corpus, especially for the sound types being asked for."
+ },
+ "live.salvage": {
+  "term": "Salvage / truncation rate",
+  "what": "The share of recent patches where the AI's output got cut off (it hit the length limit) and the app had to salvage the partial result, keeping only the settings that arrived complete.",
+  "why": "Salvaged patches are likely missing their final settings, so they can sound unfinished. A rising rate usually means prompts are too long or the output limit is too low.",
+  "tip": "High -> shorten the prompt (fewer examples) or raise the output token limit."
+ },
+ "live.clamp": {
+  "term": "Silent-clamp rate",
+  "what": "The share of recent patches where at least one value the AI asked for was out of the synth's legal range and got silently snapped to the nearest legal value.",
+  "why": "Each clamp means the delivered patch differs from what the AI intended - usually a bit duller or weaker. Repeated clamps on the same knob mean the AI keeps misjudging that range.",
+  "tip": "High -> tighten the parameter-range guidance in the system prompt."
+ },
+ "live.bad_citations": {
+  "term": "Bad-citation rate",
+  "what": "The share of recent patches where the AI cited a source that was not actually in the material it was given - a fabricated, or 'hallucinated', citation.",
+  "why": "Made-up citations undermine the whole provenance signal: a setting looks grounded but isn't. A rising rate means the AI is being loose with its sourcing rules.",
+  "tip": "High -> tighten the prompt's instruction to cite only the provided sources."
+ },
+ "live.sysex_fail": {
+  "term": "SysEx-fail rate",
+  "what": "The share of recent patches where encoding the patch to a MIDI message (for sending to hardware) failed. This is a robustness signal, not a sound-quality one.",
+  "why": "It tells you the hardware-export feature is misbehaving, but says nothing about whether the patches sound right. Useful for catching a regression in the encoder.",
+  "tip": "This won't affect on-screen patch quality - it only concerns MIDI export to hardware."
+ },
+ "live.mean_changes": {
+  "term": "Mean changes per patch",
+  "what": "The average number of settings changed per generated patch across recent runs. There is a healthy band (roughly 10-25): enough to fully shape a sound without piling on noise.",
+  "why": "Consistently too few means thin, underdeveloped patches; too many means the AI is over-tweaking with settings that don't help. Either drift is worth a prompt nudge.",
+  "tip": "Below the band -> patches feel unfinished; above it -> noisy, over-engineered patches."
+ },
+ "live.mean_ms": {
+  "term": "Mean generation time",
+  "what": "The average wall-clock time, in milliseconds, to produce one patch end to end (search + the AI call + validation).",
+  "why": "A speed and cost signal. A sudden jump can mean prompts grew, the model slowed, or retrieval got heavier - worth investigating even if quality looks fine.",
+  "tip": "The AI call usually dominates; a big jump often traces to a larger prompt or a slower model."
+ },
+ "stage.classify": {
+  "term": "Query classification",
+  "what": "A quick guess at whether your text reads like a 'make me a sound' recipe versus a factual question. On the patch-designer path it is recorded for insight only - the designer always treats the request as a sound recipe.",
+  "why": "It is a diagnostic breadcrumb here, not a decision point. It mainly matters on the question-answering side; on the patch path treat it as informational.",
+  "tip": "Marked diagnostic-only on this path - it does not change what gets retrieved."
+ },
+ "stage.pool": {
+  "term": "Retrieval pool (top ~25)",
+  "what": "The first wide net: the ~25 most relevant chunks pulled from the corpus. Each shows a relevance score ('rrf', from fusing keyword + meaning search) and a meaning-similarity score ('sim'), grouped by 'lane' (manual / reddit / article / patch).",
+  "why": "This is the raw material the AI builds from. If the right source is not in this pool, nothing downstream can rescue it. Watch the 'patch' lane - if it shows 0, no real factory patch was found to copy from for this sound.",
+  "tip": "Good: a healthy mix of lanes with a patch example present. Bad: patch lane 0, or everything from one source."
+ },
+ "stage.rerank": {
+  "term": "Actionability re-rank",
+  "what": "A second pass that re-sorts the pool to favor chunks packed with real sound-design settings ('actionability') and push down chatter like 'thanks!' or jokes, blended with the original relevance.",
+  "why": "Relevant is not the same as useful: a post can be on-topic yet contain no actual settings. This step makes sure the chunks reaching the AI carry concrete knob values, not noise.",
+  "tip": "If a clearly useful chunk ranks low, its wording may lack the setting-words the score rewards."
+ },
+ "stage.diversify": {
+  "term": "Diversity injection",
+  "what": "Makes sure the final handful of chunks is not all from one place - it tries to include a manual chunk, a community chunk, and a real factory-patch example. The 'patch_injection_outcome' readout says whether a real patch made it in, or why not (none in the pool, or all too low-quality).",
+  "why": "A patch grounded in the manual AND a real example AND community tips beats three near-duplicate chunks. 'no_candidate_in_pool' or 'all_below_floor' here is the usual root cause of all-'general synthesis' patches.",
+  "tip": "'all_below_floor' -> lower the actionability floor; 'no_candidate_in_pool' -> the corpus lacks patch examples for this sound."
+ },
+ "stage.adapt": {
+  "term": "Grounding block (retrieve-and-adapt)",
+  "what": "Loads the full settings of any real factory patches that were found, so the AI can start from a known-good patch and tweak it instead of building from scratch. Shows how many examples loaded and how the nearest-neighbor lookup went.",
+  "why": "Adapting a real patch is the single biggest accuracy lever - the AI copies proven settings rather than guessing. Empty here (no patch ids) means the AI had no real example to anchor on.",
+  "tip": "Empty grounding block -> expect more guesswork; add factory patches for that sound to the corpus."
+ },
+ "stage.prompt": {
+  "term": "Prompt assembly",
+  "what": "The full instruction package sent to the AI: the legal parameters and their ranges (the 'schema'), the reference chunks, any real patch examples, and your request. Shows the total size in characters and rough tokens (a token is about three-quarters of a word, the unit the model reads).",
+  "why": "There is a fixed budget shared by input and output. An over-large prompt can crowd out the room the model needs to finish a complete patch, leading to cut-off output.",
+  "tip": "Very large prompt plus cut-off output downstream -> trim how many examples are included."
+ },
+ "stage.llm": {
+  "term": "LLM output",
+  "what": "The AI's raw response. 'stop_reason' tells you how it finished: 'end_turn' is a clean finish; 'max_tokens' means it ran out of room and got cut off mid-patch. It also shows how many tokens it produced.",
+  "why": "A 'max_tokens' finish means the patch is probably incomplete - later settings got chopped off. That is a cue to shorten the prompt or raise the output limit.",
+  "tip": "Good: end_turn. Bad: max_tokens (truncated) - settings are likely missing."
+ },
+ "stage.extract": {
+  "term": "JSON parse",
+  "what": "Turns the AI's text into a clean, structured patch. 'json.loads' means it parsed perfectly; 'salvage' means the output was broken or cut off and the app recovered as many complete settings as it could.",
+  "why": "Salvage means you are getting a partial patch - the tail end was unrecoverable. Frequent salvage usually traces back to truncated output (see the LLM stage).",
+  "tip": "Good: json.loads. Watch: salvage means some settings were dropped."
+ },
+ "stage.validate": {
+  "term": "Validation & clamping",
+  "what": "Checks every proposed setting against the synth's real legal range. Out-of-range values are 'clamped' to the nearest legal value, unrecognized options are corrected or dropped, and settings equal to the default are removed. It surfaces these otherwise-silent changes.",
+  "why": "The AI sometimes asks for impossible values (e.g. a cutoff of 300 when the max is 164). Clamping keeps the patch playable, but a clamped value means the result differs from what the AI intended.",
+  "tip": "Many clamps on the same knob -> tighten that knob's range guidance in the prompt."
+ },
+ "stage.patch": {
+  "term": "Final patch",
+  "what": "The finished, validated patch handed to the panel: how many settings changed (a healthy band is roughly 10-25), the patch name, and any setting the AI talked about in its explanation but that did not actually make it into the patch.",
+  "why": "Too few changes means an underdeveloped sound; too many means noise. 'Narrated but not delivered' catches the confusing case where the explanation describes a setting the user will not find on the panel.",
+  "tip": "Aim for ~10-25 changes. Narrated-not-delivered items are a prompt/validation mismatch to fix."
+ },
+ "stage.provenance": {
+  "term": "Provenance breakdown",
+  "what": "Where this patch's settings came from: real corpus sources (manual / community / factory patch) versus 'general synthesis' (the AI's own generic knowledge). It also flags any citation the AI invented that was not in the prompt.",
+  "why": "This is the per-patch version of the Overview's provenance score. All-'general synthesis' means the corpus contributed nothing - the AI improvised the whole patch, so accuracy for this specific synth is at risk.",
+  "tip": "All-general -> look upstream at retrieval/grounding/corpus. Fabricated citations -> tighten the prompt's citation rules."
+ },
+ "stage.sysex": {
+  "term": "SysEx (MIDI out)",
+  "what": "Encodes the finished patch into a MIDI 'SysEx' message - the format a real Prophet-6 understands - so it can be sent to hardware. 'outcome: ok' means it encoded; anything else is an encoding error, now surfaced instead of hidden.",
+  "why": "This is a convenience feature, not a sound-quality signal. It is shown so a silent encoding failure does not go unnoticed, but a failure here does not mean the patch itself is wrong.",
+  "tip": "A sound-quality problem will not show up here; this only concerns sending the patch to hardware."
+ }
+};
+
 boot();
