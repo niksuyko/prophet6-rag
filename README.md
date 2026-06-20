@@ -1,106 +1,149 @@
-# Prophet-6 RAG Knowledge Engine
+# Prophet-6 Patch Designer
 
-A retrieval-augmented generation service that answers Sequential Prophet-6 questions from official documentation and community knowledge — and *measures* that it outperforms an ungrounded LLM baseline.
+*Describe a sound in plain English — "warm Juno-style chorus pad with slow movement" — and get a
+real, playable Sequential Prophet-6 patch: every knob and switch set on a faithful on-screen front
+panel, each move traced to the source that justified it, ready to send to the hardware over MIDI.*
 
-**Thesis:** Base LLMs answer fluently but unreliably on hardware-specific synth knowledge (parameter behavior, menu paths, community-discovered fixes, patch recipes). This system grounds answers in a curated corpus, with evaluation as a first-class deliverable.
+Under the hood it's a retrieval-augmented generation (RAG) system for one synthesizer, built on a
+single principle: **generation is grounded in a curated corpus and measured against an ungrounded
+baseline at every step.**
 
-## Pipeline
+## Thesis
 
-```
-acquire → process/chunk → embed/index → retrieve → generate
-   ↑                                        ↑
-data/raw (immutable)            eval harness measures every change
-```
+Base LLMs answer fluently but unreliably on hardware-specific synth knowledge — parameter behavior,
+menu paths, community-discovered fixes, patch recipes. This system grounds every patch and answer in
+a curated Prophet-6 corpus (the official manual, community threads, decoded factory patches, tutorial
+transcripts) and treats **evaluation as a first-class deliverable**: nothing ships on vibes; each
+change is kept or rejected on a measured number.
 
-Each stage reads files written by the previous stage (`data/raw → data/processed → data/chunks/chunks.jsonl → index`). `chunks.jsonl` is the contract between processing and indexing.
+## What it does
 
-## Evaluation metrics (defined before the pipeline was built)
-
-| Metric | Definition | Measures |
-|---|---|---|
-| **Retrieval recall@5** | Expected source/section for a golden query appears in the top-5 retrieved chunks (metadata match: section-name substring for manual chunks, source URL for reddit/article chunks). Reported overall + per bucket. | Retrieval misses |
-| **Answer faithfulness** | % of generated answers in which every factual claim is supported by a retrieved chunk. LLM-as-judge, validated by hand spot-check of ~15 verdicts. | Hallucination despite retrieval |
-| **Bake-off win rate** | Blind LLM-judged comparison: base model (no retrieval) vs. full RAG system, per golden query, reported per bucket. | Whether grounding actually helps |
-| **Patch parameter accuracy** *(v2)* | For golden queries with reference patches (`param_targets`): per-parameter agreement between the generated patch and the best-matching reference — knobs within ±10 of a 0–127 span (scaled per range), switches/selects exact. Primary number is **active agreement** (only params the reference moved off INIT); overall agreement reported for context. Per panel-section breakdown. Defined in `eval/patch_accuracy.py` before any Phase-B code existed. | Whether generated recipes match real, known-good patches (text-domain proxy for the deferred audio eval) |
-
-### Golden query buckets
-
-| Bucket | Type | Example |
-|---|---|---|
-| 1 | Factual / manual lookup | "What does the Slop parameter do?" |
-| 2 | Sound-design recipes | "Warm pad with movement — settings?" |
-| 3 | Emulative / cross-synth | "Juno-style chorus pad on the P6?" |
-| 4 | Troubleshooting / workflow | "Velocity doesn't affect anything — why?" |
-
-### Matching rule for recall@5
-
-Each golden entry lists one or more acceptable targets (`expected_targets`); a query is a
-hit if any top-5 chunk matches any target. Manual targets match on section-name substring;
-reddit targets on thread id; article/KB targets on document slug. Rationale: decisions.md D-006.
-
-## Data & reproducibility
-
-**The corpus is reproducible, not bundled.** The ~1.3 GB of raw sources, processed chunks, and
-embedding matrices live under `data/` and are **not** committed — for two reasons:
-
-1. **Licensing.** This project keeps a licensing register in `decisions.md` (D-021, D-023,
-   D-025). Several sources are marked **private-corpus-only** — decoded patch parameter data
-   (derived from Sequential's factory banks), Sound on Sound article HTML, and YouTube caption
-   text — and others (a commercial synth cookbook, paywalled magazine articles) are excluded
-   outright. The raw manual PDF and reddit content are likewise not mine to redistribute. So
-   the data is absent *by policy*, not omission.
-2. **Size + signal.** The payload is large and is the project's *input*; the engineering and
-   measurement are the deliverable.
-
-What you can see and run from this repo: all pipeline code (`src/`), the full decision log,
-the evaluation harness, the **golden query sets** (`eval/golden_set*.jsonl` — paraphrased
-queries + target metadata), and the **results** (`eval/results/*.json`, the numbers behind
-every table below). To rebuild the corpus from scratch, run the acquisition scripts
-(`src/acquire/*`) — they re-fetch from the public sources and record URL + date provenance in
-`data/raw/manifest.jsonl`. Set `ANTHROPIC_API_KEY` (see `.env.example`) for the generation and
-evaluation phases.
-
-Eval artifacts that quote source text verbatim (chunk-QA samples, judge spot-check exports,
-and the bake-off/faithfulness/patch-A-B result dumps that embed full answers) are held back
-under the same policy; the README tables and `eval/failure_analysis_*.md` carry their findings.
-
-## Running the pipeline
-
-```powershell
-# Phase 1 — acquisition (raw, re-processable; records URL + date in data/raw/manifest.jsonl)
-python src/acquire/fetch_official.py
-python src/acquire/fetch_articles.py
-python src/acquire/fetch_reddit.py
-
-# Phase 2 — chunking (per-source files in data/processed/, contract in data/chunks/)
-python src/process/chunk_manual.py
-python src/process/chunk_reddit.py
-python src/process/chunk_articles.py
-python src/process/build_chunks.py
-python src/process/validate_manual_chunks.py   # regression check vs hand-verified TOC map
-python src/process/sample_chunks.py 30 1       # human QA sample (mandatory gate)
-
-# Phase 3 — index + baseline
-python src/index/build_index.py
-python src/evaluate/recall.py baseline 5 vector
-
-# Phase 4 — techniques, one eval per change
-python src/evaluate/recall.py hybrid 5 hybrid
-
-# Phase 5 — grounded Q&A (needs ANTHROPIC_API_KEY)
-python src/generate/ask.py "what does slop do?"
-
-# Phase 6 — end-to-end evals (needs ANTHROPIC_API_KEY)
-python src/evaluate/faithfulness.py v1
-python src/evaluate/bakeoff.py v1
-
-# Visual patch designer (needs ANTHROPIC_API_KEY) — see below
-python src/ui/server.py          # then open http://127.0.0.1:8765
-```
-
-## Visual patch designer (text → animated front panel)
+**Patch creation — the main capability.** Open the Studio, type a sound, and the system designs a
+complete patch and animates it onto a hardware-accurate panel, knob by knob.
 
 ![Generated patch on the visual panel](docs/patch_panel_demo.png)
+
+- **Grounded, and honest about it.** A sidebar explains every change and badges its provenance — a
+  **manual** / **reddit** / **patch** corpus citation, or an honest `general synthesis` tag when the
+  move came from the model's own knowledge rather than the corpus. You can see exactly how much of a
+  patch is backed by real Prophet-6 facts.
+- **A faithful front panel.** 86 parameters across 17 sections, laid out to match the real desktop
+  module — the control bands, HPF above LPF, LED destination pairs, red 7-segment displays using the
+  manual's actual codes (`bbd`, `CHO`, `FR`…). Every value is validated and clamped server-side; an
+  out-of-range or unknown parameter never reaches the panel.
+- **Send it to hardware.** A MIDI toggle pushes the patch to a connected Prophet-6 as an edit-buffer
+  dump — loads instantly, never overwrites a saved program. The sysex encoder is the exact inverse of
+  the decoder (`decode(encode(p)) == p` across all 771 patches), and the FX byte mappings were
+  confirmed against real hardware captures (see `docs/KNOWN_ISSUES.md`).
+- **Save & load presets.** Name and store patches you like, then reload them — or push them straight
+  to the hardware — later.
+
+**Grounded Q&A (secondary).** `python src/generate/ask.py "what does slop do?"` answers Prophet-6
+questions with inline citations, and says *"my corpus doesn't cover this"* rather than inventing specs.
+
+## How it works — the pipeline
+
+```
+acquire  →  chunk  →  embed + index  →  retrieve  →  ground  →  generate  →  validate
+raw sources  chunks.jsonl  BGE vectors    hybrid       real        schema-      clamp to
+(manual,     (the          + BM25         search +     factory     constrained  the panel's
+ reddit,      contract)                   diversity    patches as  JSON         real ranges
+ patches…)                                             exemplars
+```
+
+Each stage reads what the previous one wrote; `data/chunks/chunks.jsonl` is the contract between
+processing and indexing. The patch path specifically:
+
+1. **Retrieve** the most relevant chunks for the sound, fusing meaning-based (BGE embeddings) and
+   keyword (BM25) search, with a diversity guarantee so the model sees the manual *and* community
+   *and* a real patch — not three near-duplicates.
+2. **Ground** — load the full settings of any retrieved factory patches so the model *adapts a
+   known-good patch* instead of guessing from scratch (decisions.md D-024).
+3. **Generate** — the LLM (Claude) writes a JSON patch constrained to the panel schema, citing a
+   source for each change.
+4. **Validate** — clamp/coerce every value to the synth's legal ranges before it reaches the panel.
+
+The parameter schema (`src/ui/patch_schema.py`) does triple duty — it's the LLM's contract, the
+server-side validator, *and* the panel layout — so the three can never drift apart.
+
+**Corpus** (rebuildable, not bundled — see below): **25,544 chunks** — 24,000 reddit Q&A +
+r/synthrecipes, 766 decoded factory/OMOM patches, 607 articles (incl. the complete Synth Secrets
+series), 92 manual/addenda, 52 video transcripts, 15 cross-synth translations, 12 official-KB.
+
+## Measured
+
+The evaluation harness (`eval/`) was defined *before* the pipeline was built, and every retrieval
+change was kept or removed on a number — including the negative results:
+
+- **Retrieval recall@5: 0.90 → 0.95.** Hybrid BM25+vector fusion closed lexical gaps on jargon-heavy
+  queries; a source-diversity guarantee recovered keyword-flooding regressions. Two textbook
+  techniques were **measured and removed** for hurting this small, domain-tight corpus: LLM query
+  decomposition (diluted the fused pool) and cross-encoder reranking (no gain over fusion).
+- **Grounded beats ungrounded.** In a blind, position-randomized, citation-stripped judge comparison,
+  RAG wins where hallucination concentrates — **11/11 factual queries**. (The base model insisted
+  vintage mode "comes with every unit right out of the box"; it actually shipped years later in OS
+  1.6.7.)
+- **Faithfulness ~93% at the claim level**, with contradictions rare — failures are overwhelmingly
+  *true-but-ungrounded* glue facts, not inventions.
+- **The patch designer adapts real, named factory patches** instead of inventing values; corpus-cited
+  provenance rose ~2.7× over the prose-only Q&A baseline.
+
+Per-bucket tables and honest post-mortems live in `eval/results/*.json` and
+`eval/failure_analysis_*.md`. (One example of the measurement ethos: a pre-cleanup corpus scored a
+flattering 1.000 recall; removing ~180 junk chunks dropped it to 0.95 — two "hits" had been riding on
+troll answers. The cleanup cost points and was correct anyway.)
+
+## Observability dashboard
+
+A local dashboard at `/dash.html` for debugging and improving patch accuracy: **replay any generation
+stage-by-stage** (retrieval pool → grounding → LLM output → validation → provenance), **diff eval
+runs** to catch regressions before they ship, and inspect **corpus coverage gaps**. Built for
+developers new to RAG — every metric carries a plain-English hover explainer. Same stdlib server, no
+new dependencies. Design: `docs/OBSERVABILITY_PLAN.md`.
+
+## Run it
+
+```bash
+pip install -r requirements.txt          # numpy, sentence-transformers, anthropic, …
+cp .env.example .env                     # set ANTHROPIC_API_KEY  (Windows: copy)
+
+python src/ui/server.py                  # then open:
+#   http://127.0.0.1:8765/studio.html    — the patch designer
+#   http://127.0.0.1:8765/dash.html      — the observability dashboard
+```
+
+Patch generation and Q&A need `ANTHROPIC_API_KEY` + internet; the dashboard, MIDI capture, and presets
+work offline. The first generation loads the embedding model (~30 s); after that it's retrieval + one
+LLM call.
+
+**Rebuild the corpus from scratch** (re-fetches public sources, records URL + date provenance):
+
+```bash
+python src/acquire/fetch_official.py     # manual + knowledge base
+python src/acquire/fetch_reddit.py       # community threads
+python src/acquire/fetch_articles.py     # recipe literature
+python src/process/build_chunks.py       # → data/chunks/chunks.jsonl
+python src/index/build_index.py          # → BGE embeddings + index
+python src/evaluate/recall.py production 5 strat+div   # measure
+```
+
+## Data, licensing & reproducibility
+
+**The corpus is reproducible, not bundled.** The ~1.3 GB of raw sources, chunks, and embeddings under
+`data/` are **not committed — by policy, not omission:**
+
+- **Licensing.** A register in `decisions.md` (D-021/D-023/D-025) marks several sources
+  *private-corpus-only* (decoded patch data, article HTML, video captions) and excludes others outright
+  (a commercial cookbook, paywalled magazines). The manual PDF and reddit content aren't ours to
+  redistribute.
+- **Size & signal.** The corpus is the project's *input*; the engineering and measurement are the
+  deliverable.
+
+What's in the repo: all pipeline code (`src/`), the full decision log, the eval harness, the golden
+query sets (`eval/golden_set*.jsonl`), and the results (`eval/results/*.json`). The acquisition scripts
+rebuild the corpus from the original public sources.
+
+## Further reading
 
 Describe a sound ("warm Juno-style chorus pad with slow movement") and the system designs a
 Prophet-6 patch: corpus retrieval (production `hybrid+div` mode) feeds an LLM constrained to
